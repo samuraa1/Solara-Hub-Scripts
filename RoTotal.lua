@@ -7,102 +7,148 @@ local Market = game:GetService("MarketplaceService")
 local pending = {}
 local allowed = {}
 local allowed2 = {}
-local request2 = clonefunction(request)
-local blockedfunctions = {
- hookfunction, writefile, makefolder, request, Market.PromptPurchase, Market.PromptGamePassPurchase, Market.PromptBundlePurchase, Market.PromptPremiumPurchase, Market.PromptSubscriptionPurchase, Market.PromptProductPurchase, Market.PerformPurchase, Market.PerformPurchaseV2 
-}
-local RBX = game:GetService('RbxAnalyticsService');
+
+local request2
+if type(request) == "function" then
+    request2 = clonefunction(request)
+else
+    request2 = function() return {Success = false} end
+end
+
+local blockedfunctions = {}
+local function safeAdd(tbl, func, name)
+    if type(func) == "function" then
+        table.insert(tbl, func)
+    end
+end
+
+safeAdd(blockedfunctions, hookfunction, "hookfunction")
+safeAdd(blockedfunctions, writefile, "writefile")
+safeAdd(blockedfunctions, makefolder, "makefolder")
+safeAdd(blockedfunctions, request, "request")
+safeAdd(blockedfunctions, Market.PromptPurchase, "PromptPurchase")
+safeAdd(blockedfunctions, Market.PromptGamePassPurchase, "PromptGamePassPurchase")
+safeAdd(blockedfunctions, Market.PromptBundlePurchase, "PromptBundlePurchase")
+safeAdd(blockedfunctions, Market.PromptPremiumPurchase, "PromptPremiumPurchase")
+safeAdd(blockedfunctions, Market.PromptSubscriptionPurchase, "PromptSubscriptionPurchase")
+safeAdd(blockedfunctions, Market.PromptProductPurchase, "PromptProductPurchase")
+safeAdd(blockedfunctions, Market.PerformPurchase, "PerformPurchase")
+safeAdd(blockedfunctions, Market.PerformPurchaseV2, "PerformPurchaseV2")
+
+local RBX = game:GetService('RbxAnalyticsService')
+
 local Specific = {
-  RbxAnalyticsService = {
-   RBX.GetClientId,
-   RBX.GetSessionId,
-   RBX.GetPlaySessionId
-  },
-  Requests = {
-   ['syn_backup.request'] = syn_backup ~= nil and syn_backup.request or nil,
-   ['http_request'] = http_request,
-   ['request'] = request,
-   ['http.request'] = http ~= nil and http.request or nil,
-   ['syn.request'] = syn ~= nil and syn.request or nil,
-   ['fluxus.request'] = fluxus ~= nil and fluxus.request or nil
-  }
+    RbxAnalyticsService = {
+        RBX.GetClientId,
+        RBX.GetSessionId,
+        RBX.GetPlaySessionId
+    },
+    Requests = {}
 }
+
+if syn_backup and type(syn_backup.request) == "function" then
+    Specific.Requests['syn_backup.request'] = syn_backup.request
+end
+if type(http_request) == "function" then
+    Specific.Requests['http_request'] = http_request
+end
+if type(request) == "function" then
+    Specific.Requests['request'] = request
+end
+if http and type(http.request) == "function" then
+    Specific.Requests['http.request'] = http.request
+end
+if syn and type(syn.request) == "function" then
+    Specific.Requests['syn.request'] = syn.request
+end
+if fluxus and type(fluxus.request) == "function" then
+    Specific.Requests['fluxus.request'] = fluxus.request
+end
+
 local Methods = {
-  RBX = {
-  'GetClientId',
-  'GetSessionId',
-  'GetPlaySessionId'
-  }
+    RBX = {
+        'GetClientId',
+        'GetSessionId',
+        'GetPlaySessionId'
+    }
 }
 local path = 'RoTotal'
 local SelfWriting, SendAsyncAllowed, SendAsyncBlocked, SelfRequesting, BySelf = false, false, false, false, false
 
 local HttpMethods = {}
-if game:FindFirstChild("HttpPost") then
-    table.insert(HttpMethods, game.HttpPost)
-end
-if game:FindFirstChild("HttpGet") then
-    table.insert(HttpMethods, game.HttpGet)
-end
-if game:FindFirstChild("HttpPostAsync") then
-    table.insert(HttpMethods, game.HttpPostAsync)
-end
-if game:FindFirstChild("HttpGetAsync") then
-    table.insert(HttpMethods, game.HttpGetAsync)
+local function safeAddHttpMethod(name)
+    if game:FindFirstChild(name) and type(game[name]) == "function" then
+        table.insert(HttpMethods, game[name])
+    end
 end
 
+safeAddHttpMethod("HttpPost")
+safeAddHttpMethod("HttpGet")
+safeAddHttpMethod("HttpPostAsync")
+safeAddHttpMethod("HttpGetAsync")
+
 function encode(a)
- return HTTPs:JSONEncode(a)
+    return HTTPs:JSONEncode(a)
 end
+
 function decode(a)
- return HTTPs:JSONDecode(a)
+    return HTTPs:JSONDecode(a)
 end
+
 function getid(list)
- for i, v in list do if type(v) == 'number' then return v end end
+    for i, v in pairs(list) do 
+        if type(v) == 'number' then 
+            return v 
+        end 
+    end
+    return nil
 end
+
 local functions = {
- URLMain = function(url)
-  local formatted = url:match("https://.+") or url:match("http://.+")
-  if formatted then
-   formatted = formatted:split("/")[3]
-   return formatted:gsub("https://", ''):gsub('http://', '')
-  end
-  return "unknown"
- end
+    URLMain = function(url)
+        local formatted = url:match("https://.+") or url:match("http://.+")
+        if formatted then
+            formatted = formatted:split("/")[3]
+            return formatted:gsub("https://", ''):gsub('http://', '')
+        end
+        return "unknown"
+    end
 }
+
 function TableLoop(thing, indent)
-  indent = indent or 1
-  if typeof(thing) ~= 'table' then 
-      return tostring(thing) 
-  end
-  
-  local result = '{\n'
-  
-  for i, v in pairs(thing) do
-      local key = tostring(i)
-      local value = TableLoop(v, indent + 1)
-      local value2 = ''
-      value2 = (typeof(v) == 'string' and ("'%s'"):format(v)) or tostring(value)
-      
-      result = result .. string.rep('  ', indent) .. "['" .. key .. "'] = " .. value2 .. ',\n'
-  end
-  
-  return result .. string.rep('  ', indent - 1) .. "}"
+    indent = indent or 1
+    if typeof(thing) ~= 'table' then 
+        return tostring(thing) 
+    end
+    
+    local result = '{\n'
+    
+    for i, v in pairs(thing) do
+        local key = tostring(i)
+        local value = TableLoop(v, indent + 1)
+        local value2 = ''
+        value2 = (typeof(v) == 'string' and ("'%s'"):format(v)) or tostring(value)
+        
+        result = result .. string.rep('  ', indent) .. "['" .. key .. "'] = " .. value2 .. ',\n'
+    end
+    
+    return result .. string.rep('  ', indent - 1) .. "}"
 end
+
 function tocURL(args)
-   local cmd = "curl -X " .. (args.Method or "GET") .. " \"" .. (args.Url or "") .. "\""
+    local cmd = "curl -X " .. (args.Method or "GET") .. " \"" .. (args.Url or "") .. "\""
     
-        if args.Headers then
-            for key, value in pairs(args.Headers) do
-                cmd = cmd .. " -H \"" .. tostring(key) .. ": " .. tostring(value) .. "\""
-            end
+    if args.Headers then
+        for key, value in pairs(args.Headers) do
+            cmd = cmd .. " -H \"" .. tostring(key) .. ": " .. tostring(value) .. "\""
         end
+    end
     
-        if args.Body then
-            cmd = cmd .. " --data-raw '" .. tostring(args.Body) .. "'"
-        end
+    if args.Body then
+        cmd = cmd .. " --data-raw '" .. tostring(args.Body) .. "'"
+    end
     
-        return cmd
+    return cmd
 end
 
 local Window = Fluent:CreateWindow({
@@ -120,6 +166,7 @@ local Tabs = {
 }
 
 local Options = Fluent.Options
+
 function Notify(title, text, duration)
     Fluent:Notify({
         Title = title,
@@ -132,98 +179,140 @@ SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 
 Tabs.Socials:AddButton({
-        Title = "Discord",
-        Description = "Join my discord server",
-        Callback = function()
-         local success, err = pcall(setclipboard, discord)
-         if success then
-          Notify("Success", 'Successfully copied discord invite to clipboard!', 5)
-         else
-          Notify("Error!", 'Failed to copy invite to clipboard, Printed error message.', 5)
-          warn(err)
-         end
+    Title = "Discord",
+    Description = "Join my discord server",
+    Callback = function()
+        local success, err = pcall(setclipboard, discord)
+        if success then
+            Notify("Success", 'Successfully copied discord invite to clipboard!', 5)
+        else
+            Notify("Error!", 'Failed to copy invite to clipboard, Printed error message.', 5)
+            warn(err)
         end
+    end
 })
+
 Tabs.Socials:AddButton({
-  Title = "Other Scripts",
-  Description = "https://scriptblox.com/u/vxsty",
-  Callback = function()
-    setclipboard("https://scriptblox.com/u/vxsty")
-    Notify("Success", "Copied to clipboard!", 3)
-  end
+    Title = "Other Scripts",
+    Description = "https://scriptblox.com/u/vxsty",
+    Callback = function()
+        setclipboard("https://scriptblox.com/u/vxsty")
+        Notify("Success", "Copied to clipboard!", 3)
+    end
 })
 
 local old0, old00, old, old3, old4, old5, old6, old7, old10
 
-old0 = hookfunction(game:GetService("Players").LocalPlayer.Kick, newcclosure(function(Self, message)
- return Notify("AntiKick", 'Kick attempt denied, Kick Message: ' .. tostring(message), 10)
-end))
+local function safeHookFunction(func, newFunc, funcName)
+    if type(func) == "function" then
+        return hookfunction(func, newFunc)
+    else
+        warn("Attempted to hook non-function: " .. tostring(funcName))
+        return func
+    end
+end
 
-old00 = hookfunction(game:GetService("Players").ReportAbuse, newcclosure(function(Self, ...)
-  return Notify("ReportAbuse", 'ReportAbuse attempt denied.', 6)
-end))
+old0 = safeHookFunction(game:GetService("Players").LocalPlayer.Kick, newcclosure(function(Self, message)
+    return Notify("AntiKick", 'Kick attempt denied, Kick Message: ' .. tostring(message), 10)
+end), "LocalPlayer.Kick")
+
+old00 = safeHookFunction(game:GetService("Players").ReportAbuse, newcclosure(function(Self, ...)
+    return Notify("ReportAbuse", 'ReportAbuse attempt denied.', 6)
+end), "Players.ReportAbuse")
 
 old = hookmetamethod(game, "__namecall", newcclosure(function(Self, ...)
- local Method, Args = getnamecallmethod(), {...}
+    local Method, Args = getnamecallmethod(), {...}
 
- if Method:lower():find('http') and SelfRequesting then 
-     return old(Self, ...) 
- end
- 
- if Method == 'CaptureFocus' then
-    local tab = Window:AddTab({ Title = 'CaptureFocus', Icon = "focus" })
-    tab:AddParagraph({
-      Title = 'CaptureFocus access wanted.',
-      Content = (getcallingscript() and getcallingscript():GetFullName() or 'unknown') .. ' would like to use CaptureFocus on ' .. tostring(Self)
-    })
-    tab:AddButton({Title='Allow', Description='Always allows CaptureFocus on this instance', Callback=function()
-     table.insert(allowed2, Self)
-    end})
-    tab:AddButton({Title='Block', Description='Removes this from the allowed table', Callback=function()
-     for i, v in pairs(allowed2) do if v == Self then table.remove(allowed2, i) break end end
-    end})
-    return
- elseif Method == 'SendAsync' then
-    if not table.find(allowed2, Self) and not BySelf then
-      local tab = Window:AddTab({ Title = 'SendAsync', Icon = "send" })
-      tab:AddParagraph({
-        Title = "Channel",
-        Content = Self.Name
-      })
-      tab:AddParagraph({
-        Title = "Message",
-        Content = Args[1]
-      })
-      tab:AddButton({Title='Send', Description='Sends the message in the select channel.', Callback=function()
-       BySelf = true 
-       local success = pcall(function() Self:SendAsync(Args[1]) end)
-       BySelf = false
-       if success then
-           Notify("Success", "Message sent!", 3)
-       end
-      end})
-      tab:AddButton({Title='Allow', Description="Allows messages to be sent by a script in this channel", Callback=function()
-        table.insert(allowed2, Self)
-      end})
-      tab:AddButton({Title='Block', Description="Blocks messages being sent by a script in this channel", Callback=function()
-        for i, v in pairs(allowed2) do if v == Self then table.remove(allowed2, i) break end end
-      end})
-      return
+    if Method:lower():find('http') and SelfRequesting then 
+        return old(Self, ...) 
     end
- elseif table.find(Methods.RBX, Method) then
-     return HTTPs:GenerateGUID(false)
- elseif Method == 'RequestLimitedAsync' then
-      Notify('RequestLimitedAsync', 'Script tried to use RequestLimitedAsync, Denying..', 5)
-      return
- end
- 
- return old(Self, ...)
+    
+    if Method == 'CaptureFocus' then
+        local tab = Window:AddTab({ Title = 'CaptureFocus', Icon = "focus" })
+        tab:AddParagraph({
+            Title = 'CaptureFocus access wanted.',
+            Content = (getcallingscript() and getcallingscript():GetFullName() or 'unknown') .. ' would like to use CaptureFocus on ' .. tostring(Self)
+        })
+        tab:AddButton({
+            Title = 'Allow', 
+            Description = 'Always allows CaptureFocus on this instance', 
+            Callback = function()
+                table.insert(allowed2, Self)
+            end
+        })
+        tab:AddButton({
+            Title = 'Block', 
+            Description = 'Removes this from the allowed table', 
+            Callback = function()
+                for i, v in pairs(allowed2) do 
+                    if v == Self then 
+                        table.remove(allowed2, i) 
+                        break 
+                    end 
+                end
+            end
+        })
+        return
+    elseif Method == 'SendAsync' then
+        if not table.find(allowed2, Self) and not BySelf then
+            local tab = Window:AddTab({ Title = 'SendAsync', Icon = "send" })
+            tab:AddParagraph({
+                Title = "Channel",
+                Content = Self.Name
+            })
+            tab:AddParagraph({
+                Title = "Message",
+                Content = Args[1]
+            })
+            tab:AddButton({
+                Title = 'Send', 
+                Description = 'Sends the message in the select channel.', 
+                Callback = function()
+                    BySelf = true 
+                    local success = pcall(function() 
+                        Self:SendAsync(Args[1]) 
+                    end)
+                    BySelf = false
+                    if success then
+                        Notify("Success", "Message sent!", 3)
+                    end
+                end
+            })
+            tab:AddButton({
+                Title = 'Allow', 
+                Description = "Allows messages to be sent by a script in this channel", 
+                Callback = function()
+                    table.insert(allowed2, Self)
+                end
+            })
+            tab:AddButton({
+                Title = 'Block', 
+                Description = "Blocks messages being sent by a script in this channel", 
+                Callback = function()
+                    for i, v in pairs(allowed2) do 
+                        if v == Self then 
+                            table.remove(allowed2, i) 
+                            break 
+                        end 
+                    end
+                end
+            })
+            return
+        end
+    elseif table.find(Methods.RBX, Method) then
+        return HTTPs:GenerateGUID(false)
+    elseif Method == 'RequestLimitedAsync' then
+        Notify('RequestLimitedAsync', 'Script tried to use RequestLimitedAsync, Denying..', 5)
+        return
+    end
+    
+    return old(Self, ...)
 end))
 
 for i, methodName in pairs({"HttpPost", "HttpGet", "HttpPostAsync", "HttpGetAsync"}) do
-    if game:FindFirstChild(methodName) then
+    if game:FindFirstChild(methodName) and type(game[methodName]) == "function" then
         local original = game[methodName]
-        hookfunction(original, function(Self, ...)
+        safeHookFunction(original, function(Self, ...)
             if SelfRequesting then 
                 SelfRequesting = false
                 return original(Self, ...)
@@ -256,232 +345,194 @@ for i, methodName in pairs({"HttpPost", "HttpGet", "HttpPostAsync", "HttpGetAsyn
                 end
                 
                 if method == "Post" then
-                    tab:AddButton({Title='Allow', Description="Adds the request url to the allowed urls table", Callback=function()
-                        table.insert(allowed, url)
-                    end})
-                    tab:AddButton({Title='Block', Description="Removes the request url from the allowed urls table", Callback=function()
-                        for i, v in pairs(allowed) do if v == url then table.remove(allowed, i) break end end
-                    end})
+                    tab:AddButton({
+                        Title = 'Allow', 
+                        Description = "Adds the request url to the allowed urls table", 
+                        Callback = function()
+                            table.insert(allowed, url)
+                        end
+                    })
+                    tab:AddButton({
+                        Title = 'Block', 
+                        Description = "Removes the request url from the allowed urls table", 
+                        Callback = function()
+                            for i, v in pairs(allowed) do 
+                                if v == url then 
+                                    table.remove(allowed, i) 
+                                    break 
+                                end 
+                            end
+                        end
+                    })
                 end
                 
                 return nil
             end
             
             return original(Self, ...)
-        end)
+        end, methodName)
     end
 end
 
-old3 = hookfunction(writefile, newcclosure(function(file, content)
- if not SelfWriting and file == path.."/config.json" then
-  warn("Script tried to access RoTotal/config.json files, Attempt denied.")
-  Notify('Files Accessed', 'Script attempted to access the RoTotal files, Attempt denied.', 8)
-  return
- end
- return old3(file, tostring(content))
-end))
-
-old4 = hookfunction(makefolder, newcclosure(function(folderPath)
-    if not SelfWriting and folderPath == path then
-     warn("Script tried to recreate the RoTotal folder, Attempt denied.")
-     Notify('Files Accessed', 'Script attempted to access the RoTotal files, Attempt denied.', 8)
-     return
+old3 = safeHookFunction(writefile, newcclosure(function(file, content)
+    if not SelfWriting and file == path.."/config.json" then
+        warn("Script tried to access RoTotal/config.json files, Attempt denied.")
+        Notify('Files Accessed', 'Script attempted to access the RoTotal files, Attempt denied.', 8)
+        return
     end
-   return old4(folderPath)
-end))
-old5 = hookfunction(clonefunction, newcclosure(function(func)
- if table.find(blockedfunctions, func) or func == clonefunction then
-  Notify('Bypass Attempt', 'Script tried to bypass detections with clonefunction, attempt denied.', 8)
-  return print
- end
- return old5(func)
-end))
-old6 = hookfunction(hookfunction, newcclosure(function(func, func2)
+    return old3(file, tostring(content))
+end), "writefile")
+
+old4 = safeHookFunction(makefolder, newcclosure(function(folderPath)
+    if not SelfWriting and folderPath == path then
+        warn("Script tried to recreate the RoTotal folder, Attempt denied.")
+        Notify('Files Accessed', 'Script attempted to access the RoTotal files, Attempt denied.', 8)
+        return
+    end
+    return old4(folderPath)
+end), "makefolder")
+
+old5 = safeHookFunction(clonefunction, newcclosure(function(func)
+    if table.find(blockedfunctions, func) or func == clonefunction then
+        Notify('Bypass Attempt', 'Script tried to bypass detections with clonefunction, attempt denied.', 8)
+        return print
+    end
+    return old5(func)
+end), "clonefunction")
+
+old6 = safeHookFunction(hookfunction, newcclosure(function(func, func2)
     if func == hookfunction then
-     Notify('Bypass Attempt', 'Script tried to bypass detections with hookfunction, attempt denied.', 8)
-     return print -- Makes script print every function they want to use instead of actually hook xD
+        Notify('Bypass Attempt', 'Script tried to bypass detections with hookfunction, attempt denied.', 8)
+        return print
     end
     return old6(func, func2)
-end))
-old7 = hookfunction(Market.GetRobuxBalance, function(...)
- return nil -- Error out some scripts.
-end)
-local Hook = {game.HttpPostAsync, game.HttpGet, game.HttpGetAsync}
-for i = 1, 4 do
- local v;
- v = hookfunction(Hook[i], function(Self, ...)
-    local args = {}
-    local Args = {...}
-    args.Url = Args[1]
-    args.Method = i <= 2 and 'POST' or 'GET'
-    args.Body = Args[2] or ''
-    args.Headers = Args[3] and {
-     ['Content-Type'] = Args[3]
-    } or {}
-    if not table.find(allowed, args.Url) and not SelfRequesting then
-      local tab = Window:AddTab({ Title = functions.URLMain(args.Url), Icon = "globe" })
-      tab:AddParagraph({
-        Title = 'Requested With',
-        Content = Hook[i] == game.HttpPost and 'game.HttpPost' or Hook[i] == game.HttpPostAsync and 'game.HttpPostAsync' or Hook[i] == game.HttpGet and 'game.HttpGet' or Hook[i] == game.HttpGetAsync and 'game.HttpGetAsync'
-       })
-      tab:AddParagraph({
-       Title = "URL",
-       Content = args.Url
-      })
-      tab:AddParagraph({
-       Title = "Method",
-       Content = args.Method
-      })
-      if args.Headers and #args.Headers > 0 then
-       tab:AddParagraph({Title='Headers', Content=TableLoop(args.Headers, 1)})
-      end
-      if args.Body and args.Body ~= '' then
-       tab:AddParagraph({
-        Title = "Body",
-        Content = tostring(args.Body)
-       })
-      end
-      if args.Method ~= 'GET' then
-      tab:AddButton({Title='Allow', Description="Adds the request url to the allowed urls table (POST REQUEST ONLY).", Callback=function()
-       table.insert(allowed, args.Url)
-      end})
-      tab:AddButton({Title='Block', Description="Removes the request url from the allowed urls table (if it exists)", Callback=function()
-        for i, v in allowed do if v == args.Url then print("Found,", v) table.remove(allowed, i) end end
-      end})
-      end
-      local drop = tab:AddDropdown("CopyDropdown", {
-        Title = "Copy As",
-        Values = {'', "Source", "cURL"},
-        Multi = false,
-        Default = '',
-      })
-      local POSTSource = ('game:HttpPost("%s", "%s", "%s");'):format(args.Url or '', args.Body or '', Args[3] or '')
-      local GETSource = ('game:HttpGet("%s");'):format(args.Url or '')
-      drop:OnChanged(function(val)
-      if val == 'Source' then
-       setclipboard(args.Method=='POST'and POSTSource or GETSource)
-       Fluent:Notify({
-        Title = "Copied",
-        Content = "Successfully copied as source code!",
-        SubContent = "", 
-        Duration = 5
-       })
-       elseif val == 'cURL' then
-       setclipboard(tocURL(args))
-       Fluent:Notify({
-        Title = "Copied",
-        Content = "Successfully copied as cURL!",
-        SubContent = "", 
-        Duration = 5
-       })
-     end
-    end)
-    if args.Method == 'GET' then
-     return v(Self, ...)
-    end
-    print('Not SelfRequesting or found in allowed urls.')
-    return
-  elseif SelfRequesting then
-   SelfRequesting = false
-   return v(Self, ...)
-  end
-    return v(Self, ...)
- end)
-end
-old10 = hookfunction(game:GetService("Players").ReportAbuse, newcclosure(function(Self, ...)
- local Args = {...}
- return Notify("ReportAbuse Accessed", 'Script tried to access ReportAbuse and report player '..tostring(Args[1]), 10)
-end))
+end), "hookfunction")
+
 for i = 7, #blockedfunctions do
- local old0 = hookfunction(blockedfunctions[i], newcclosure(function(...)
-  local info = Market:GetProductInfo(getid({...}))
-  local owner = info.CreatorTargetId
-  local Owner = game:GetService('Players'):GetNameFromUserIdAsync(owner);
-  local price = info.PriceInRobux
-  print("Owner:",Owner,"\nPrice:",price,'\nOwner ID:',owner)
-  Notify('MarketplaceService', 'Script attempted to prompt/complete a purchase, printed product info.', 5)
-  return
- end))
-end
-for i, v in Specific.RbxAnalyticsService do
- hookfunction(v, function()
-  Notify("RbxAnalyticsService accessed", 'RbxAnalyticsService accessed with member '..tostring(debug.getinfo(v).name)..", returned random GUID", 5)
-  return HTTPs:GenerateGUID(false)
- end)
-end
-for i, v in Specific.Requests do
- local old0;
- old0 = hookfunction(v, newcclosure(function(...)
-  if SelfRequesting then SelfRequesting = false return old(...) end
-  local args = {...}
-  if typeof(args) == 'table' and typeof(args[1]) == 'table' then 
-   args = args[1]
-  end
-  if not table.find(allowed, args.Url) or not SelfRequesting then
-    local tab = Window:AddTab({ Title = functions.URLMain(args.Url), Icon = "globe" })
-    tab:AddParagraph({
-     Title = 'Requested With',
-     Content = typeof(i) ~= 'number' and i or debug.getinfo(v).name or '??'
-    })
-    tab:AddParagraph({
-     Title = "URL",
-     Content = args.Url
-    })
-    tab:AddParagraph({
-     Title = "Method",
-     Content = args.Method
-    })
-    tab:AddParagraph({Title='Headers', Content=TableLoop(args.Headers, 1) or 'No Headers'})
-    tab:AddParagraph({
-      Title = "Body",
-      Content = args.Body or 'Empty'
-     })
-    if args.Method ~= 'GET' then
-    tab:AddButton({Title='Allow', Description="Adds the request url to the allowed urls table (POST REQUEST ONLY).", Callback=function()
-     table.insert(allowed, args.Url)
-    end})
-    tab:AddButton({Title='Block', Description="Removes the request url from the allowed urls table (if it exists)", Callback=function()
-      for i, v in allowed do if v == args.Url then print("Found,", v) table.remove(allowed, i) end end
-    end})
+    local func = blockedfunctions[i]
+    if type(func) == "function" then
+        safeHookFunction(func, newcclosure(function(...)
+            local productId = getid({...})
+            if productId then
+                local success, info = pcall(function()
+                    return Market:GetProductInfo(productId)
+                end)
+                if success then
+                    local owner = info.CreatorTargetId
+                    local Owner = "Unknown"
+                    local price = info.PriceInRobux or 0
+                    
+                    pcall(function()
+                        Owner = game:GetService('Players'):GetNameFromUserIdAsync(owner)
+                    end)
+                    
+                    print("Owner:", Owner, "\nPrice:", price, '\nOwner ID:', owner)
+                    Notify('MarketplaceService', 'Script attempted to prompt/complete a purchase, printed product info.', 5)
+                end
+            end
+            return
+        end), "MarketplaceFunction_" .. i)
     end
-    local drop = tab:AddDropdown("CopyDropdown", {
-        Title = "Copy As",
-        Values = {'', "Source", "cURL"},
-        Multi = false,
-        Default = '',
-    })
-    drop:OnChanged(function(val)
-     if val == 'Source' then
-      setclipboard(string.format(
-       '%s({\n Url=\'%s\',\n Method=\'%s\',\n Body = \'%s\',\n Headers=%s\n})',
-       i, args.Url, args.Method, args.Body or '', args.Headers and TableLoop(args.Headers, 2) or '{}'
-      ))
-      Fluent:Notify({
-        Title = "Copied",
-        Content = "Successfully copied as source code!",
-        SubContent = "", 
-        Duration = 5
-      })
-     elseif val == 'cURL' then
-      setclipboard(tocURL(args))
-      Fluent:Notify({
-        Title = "Copied",
-        Content = "Successfully copied as cURL!",
-        SubContent = "", 
-        Duration = 5
-      })
-     end
-    end)
-    local r = request2({Url=args.Url, Method='GET'})
-    local Cookies, Headers = r.Cookies, r.Headers
-    return {
-     StatusCode = r.StatusCode,
-     Success = r.Success,
-     StatusMessage = r.StatusMessage,
-     Cookies = Cookies,
-     Headers = Headers
-    }
-  end
-  return old0(...)
- end))
+end
+
+for i, v in ipairs(Specific.RbxAnalyticsService) do
+    if type(v) == "function" then
+        safeHookFunction(v, function()
+            Notify("RbxAnalyticsService accessed", 'RbxAnalyticsService accessed, returned random GUID', 5)
+            return HTTPs:GenerateGUID(false)
+        end, "RbxAnalyticsService_" .. i)
+    end
+end
+
+for name, v in pairs(Specific.Requests) do
+    if type(v) == "function" then
+        local old0 = v
+        safeHookFunction(v, newcclosure(function(...)
+            if SelfRequesting then 
+                SelfRequesting = false 
+                return old0(...) 
+            end
+            
+            local args = {...}
+            if #args > 0 and type(args[1]) == 'table' then 
+                args = args[1]
+            end
+            
+            if args.Url and not table.find(allowed, args.Url) then
+                local tab = Window:AddTab({ Title = functions.URLMain(args.Url), Icon = "globe" })
+                tab:AddParagraph({
+                    Title = 'Requested With',
+                    Content = name
+                })
+                tab:AddParagraph({
+                    Title = "URL",
+                    Content = args.Url
+                })
+                tab:AddParagraph({
+                    Title = "Method",
+                    Content = args.Method or "GET"
+                })
+                tab:AddParagraph({
+                    Title = 'Headers', 
+                    Content = args.Headers and TableLoop(args.Headers, 1) or 'No Headers'
+                })
+                tab:AddParagraph({
+                    Title = "Body",
+                    Content = args.Body or 'Empty'
+                })
+                
+                if args.Method and args.Method ~= 'GET' then
+                    tab:AddButton({
+                        Title = 'Allow', 
+                        Description = "Adds the request url to the allowed urls table", 
+                        Callback = function()
+                            table.insert(allowed, args.Url)
+                        end
+                    })
+                    tab:AddButton({
+                        Title = 'Block', 
+                        Description = "Removes the request url from the allowed urls table", 
+                        Callback = function()
+                            for i, v in pairs(allowed) do 
+                                if v == args.Url then 
+                                    table.remove(allowed, i) 
+                                    break 
+                                end 
+                            end
+                        end
+                    })
+                end
+                
+                local drop = tab:AddDropdown("CopyDropdown", {
+                    Title = "Copy As",
+                    Values = {'', "Source", "cURL"},
+                    Multi = false,
+                    Default = '',
+                })
+                
+                drop:OnChanged(function(val)
+                    if val == 'Source' then
+                        setclipboard(string.format(
+                            '%s({\n Url=\'%s\',\n Method=\'%s\',\n Body = \'%s\',\n Headers=%s\n})',
+                            name, args.Url or '', args.Method or 'GET', args.Body or '', args.Headers and TableLoop(args.Headers, 2) or '{}'
+                        ))
+                        Notify("Copied", "Successfully copied as source code!", 5)
+                    elseif val == 'cURL' then
+                        setclipboard(tocURL(args))
+                        Notify("Copied", "Successfully copied as cURL!", 5)
+                    end
+                end)
+                
+                return {
+                    StatusCode = 403,
+                    Success = false,
+                    StatusMessage = "Blocked by RoTotal",
+                    Cookies = {},
+                    Headers = {}
+                }
+            end
+            
+            return old0(...)
+        end), name)
+    end
 end
