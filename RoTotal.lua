@@ -2,8 +2,8 @@ local discord = 'https://discord.gg/gYhqMRBeZV'
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-local HTTPs = game:GetService"HttpService";
-local Market = game:GetService"MarketplaceService"
+local HTTPs = game:GetService("HttpService")
+local Market = game:GetService("MarketplaceService")
 local pending = {}
 local allowed = {}
 local allowed2 = {}
@@ -35,12 +35,27 @@ local Methods = {
   }
 }
 local path = 'RoTotal'
-local SelfWriting, SendAsyncAllowed, SendAsyncBlocked = false, false, false
+local SelfWriting, SendAsyncAllowed, SendAsyncBlocked, SelfRequesting, BySelf = false, false, false, false, false
+
+local HttpMethods = {}
+if game:FindFirstChild("HttpPost") then
+    table.insert(HttpMethods, game.HttpPost)
+end
+if game:FindFirstChild("HttpGet") then
+    table.insert(HttpMethods, game.HttpGet)
+end
+if game:FindFirstChild("HttpPostAsync") then
+    table.insert(HttpMethods, game.HttpPostAsync)
+end
+if game:FindFirstChild("HttpGetAsync") then
+    table.insert(HttpMethods, game.HttpGetAsync)
+end
+
 function encode(a)
- HTTPs:JSONEncode(a)
+ return HTTPs:JSONEncode(a)
 end
 function decode(a)
- HTTPs:JSONDecode(a)
+ return HTTPs:JSONDecode(a)
 end
 function getid(list)
  for i, v in list do if type(v) == 'number' then return v end end
@@ -48,11 +63,15 @@ end
 local functions = {
  URLMain = function(url)
   local formatted = url:match("https://.+") or url:match("http://.+")
-  formatted = formatted:split("/")[3]
-  return formatted:gsub("https://", ''):gsub('http://', '')
+  if formatted then
+   formatted = formatted:split("/")[3]
+   return formatted:gsub("https://", ''):gsub('http://', '')
+  end
+  return "unknown"
  end
 }
 function TableLoop(thing, indent)
+  indent = indent or 1
   if typeof(thing) ~= 'table' then 
       return tostring(thing) 
   end
@@ -63,7 +82,7 @@ function TableLoop(thing, indent)
       local key = tostring(i)
       local value = TableLoop(v, indent + 1)
       local value2 = ''
-      value2 = (typeof(value) == 'string' and ("'%s'"):format(value)) or (typeof(value) == 'number' and tostring(value))
+      value2 = (typeof(v) == 'string' and ("'%s'"):format(v)) or tostring(value)
       
       result = result .. string.rep('  ', indent) .. "['" .. key .. "'] = " .. value2 .. ',\n'
   end
@@ -71,16 +90,16 @@ function TableLoop(thing, indent)
   return result .. string.rep('  ', indent - 1) .. "}"
 end
 function tocURL(args)
-   local cmd = "curl request " .. args.Method .. " \"" .. args.Url .. "\""
+   local cmd = "curl -X " .. (args.Method or "GET") .. " \"" .. (args.Url or "") .. "\""
     
         if args.Headers then
-            for key, value in args.Headers do
-                cmd = cmd .. " -H \"" .. key .. ": " .. value .. "\"\n"
+            for key, value in pairs(args.Headers) do
+                cmd = cmd .. " -H \"" .. tostring(key) .. ": " .. tostring(value) .. "\""
             end
         end
     
         if args.Body then
-            cmd = cmd .. " --data-raw '" .. args.Body .. "'"
+            cmd = cmd .. " --data-raw '" .. tostring(args.Body) .. "'"
         end
     
         return cmd
@@ -105,7 +124,7 @@ function Notify(title, text, duration)
     Fluent:Notify({
         Title = title,
         Content = text,
-        Duration = duration 
+        Duration = duration or 5
     })
 end
 
@@ -127,146 +146,44 @@ Tabs.Socials:AddButton({
 })
 Tabs.Socials:AddButton({
   Title = "Other Scripts",
-  Content = "https://scriptblox.com/u/vxsty",
+  Description = "https://scriptblox.com/u/vxsty",
   Callback = function()
     setclipboard("https://scriptblox.com/u/vxsty")
+    Notify("Success", "Copied to clipboard!", 3)
   end
 })
-local old0, old00, old, old2, old3, old4, old5, old6, old7, old8, old9, old10, old11 -- Namecall HttpPost, Anti chat ban, Abusing filesystem (Adding urls to RoTotal/config.json)
+
+local old0, old00, old, old3, old4, old5, old6, old7, old10
+
 old0 = hookfunction(game:GetService("Players").LocalPlayer.Kick, newcclosure(function(Self, message)
  return Notify("AntiKick", 'Kick attempt denied, Kick Message: ' .. tostring(message), 10)
 end))
-old00 = hookfunction(game:GetService("Players").ReportAbuse, newcclosure(function(Self, message)
+
+old00 = hookfunction(game:GetService("Players").ReportAbuse, newcclosure(function(Self, ...)
   return Notify("ReportAbuse", 'ReportAbuse attempt denied.', 6)
 end))
+
 old = hookmetamethod(game, "__namecall", newcclosure(function(Self, ...)
  local Method, Args = getnamecallmethod(), {...}
- if Method:lower():find('http') and SelfRequesting then return old(Self, ...) end
+
+ if Method:lower():find('http') and SelfRequesting then 
+     return old(Self, ...) 
+ end
+ 
  if Method == 'CaptureFocus' then
     local tab = Window:AddTab({ Title = 'CaptureFocus', Icon = "focus" })
     tab:AddParagraph({
       Title = 'CaptureFocus access wanted.',
-      Content = (getcallingscript() ~= nil and getcallingscript():GetFullName() or 'unknown') .. ' would like to use CaptureFocus on ' .. tostring(Self)
+      Content = (getcallingscript() and getcallingscript():GetFullName() or 'unknown') .. ' would like to use CaptureFocus on ' .. tostring(Self)
     })
     tab:AddButton({Title='Allow', Description='Always allows CaptureFocus on this instance', Callback=function()
      table.insert(allowed2, Self)
     end})
-    tab:AddButton({Title='Block', Description='Removes this from the allowed table, Used if you only wanted to allow once or you accidently allowed.', Callback=function()
-     for i, v in allowed2 do if v == Self then v = nil end end
+    tab:AddButton({Title='Block', Description='Removes this from the allowed table', Callback=function()
+     for i, v in pairs(allowed2) do if v == Self then table.remove(allowed2, i) break end end
     end})
-  elseif Method:sub(1, 8):lower() == 'httppost' and not SelfRequesting then
-    local args = {}
-    args.Url = Args[1]
-    args.Method = 'POST'
-    args.Body = Args[2] or ''
-    args.Headers = Args[3] and {
-     ['Content-Type'] = Args[3]
-    } or {}
-    if not table.find(allowed, args.Url) then
-      local tab = Window:AddTab({ Title = functions.URLMain(args.Url), Icon = "globe" })
-      tab:AddParagraph({
-       Title = 'Requested With',
-       Content = 'game:' .. Method
-      })
-      tab:AddParagraph({
-       Title = "URL",
-       Content = args.Url
-      })
-      tab:AddParagraph({
-       Title = "Method",
-       Content = args.Method
-      })
-      if args.Headers and #args.Headers > 0 then
-       tab:AddParagraph({Title='Headers', Content=TableLoop(args.Headers, 1)})
-      end
-      if args.Body and args.Body ~= '' then
-       tab:AddParagraph({
-        Title = "Body",
-        Content = tostring(args.Body)
-       })
-      end
-      tab:AddButton({Title='Allow', Description="Adds the request url to the allowed urls table (POST REQUEST ONLY).", Callback=function()
-       table.insert(allowed, args.Url)
-      end})
-      tab:AddButton({Title='Block', Description="Removes the request url from the allowed urls table (if it exists)", Callback=function()
-        for i, v in allowed do if v == args.Url then print("Found,", v) table.remove(allowed, i) end end
-      end})
-      local drop = tab:AddDropdown("CopyDropdown", {
-        Title = "Copy As",
-        Values = {'', "Source", "cURL"},
-        Multi = false,
-        Default = '',
-    })
-    drop:OnChanged(function(val)
-     if val == 'Source' then
-      setclipboard(string.format(
-       '%s({\n Url=\'%s\'\n Method=\'%s\'\n Body = \'%s\'\n Headers=%s\n}',
-       debug.getinfo(v).name or 'request', args.Url, args.Method, args.Body or '', args.Headers and #args.Headers > 0 and TableLoop(args.Headers, 2) or '{}'
-      ))
-      Fluent:Notify({
-        Title = "Copied",
-        Content = "Successfully copied as source code!",
-        SubContent = "", 
-        Duration = 5
-      })
-     elseif val == 'cURL' then
-      setclipboard(tocURL(args))
-      Fluent:Notify({
-        Title = "Copied",
-        Content = "Successfully copied as cURL!",
-        SubContent = "", 
-        Duration = 5
-      })
-     end
-    end)
     return
-    end
-  elseif Method:sub(1, 7):lower() == 'httpget' then
-    local args = {}
-    local Args = {...}
-    args.Url = Args[1]
-    args.Method = 'GET'
-    local tab = Window:AddTab({ Title = functions.URLMain(args.Url), Icon = "globe" })
-      tab:AddParagraph({
-       Title = 'Requested With',
-       Content = 'game:' .. Method
-      })
-      tab:AddParagraph({
-       Title = "URL",
-       Content = args.Url
-      })
-      tab:AddParagraph({
-       Title = "Method",
-       Content = args.Method
-      })
-      local drop = tab:AddDropdown("CopyDropdown", {
-        Title = "Copy As",
-        Values = {'', "Source", "cURL"},
-        Multi = false,
-        Default = '',
-    })
-    drop:OnChanged(function(val)
-     if val == 'Source' then
-      setclipboard('game:HttpGet(\''..args.Url..'\');')
-      Fluent:Notify({
-        Title = "Copied",
-        Content = "Successfully copied as source code!",
-        SubContent = "", 
-        Duration = 5
-      })
-     elseif val == 'cURL' then
-      setclipboard(tocURL(args))
-      Fluent:Notify({
-        Title = "Copied",
-        Content = "Successfully copied as cURL!",
-        SubContent = "", 
-        Duration = 5
-      })
-     end
-    end)
-    SelfRequesting = true
-    return game.HttpGet(game, Args[1])
-  elseif Method:sub(1, 9):lower() == 'sendasync' then
+ elseif Method == 'SendAsync' then
     if not table.find(allowed2, Self) and not BySelf then
       local tab = Window:AddTab({ Title = 'SendAsync', Icon = "send" })
       tab:AddParagraph({
@@ -278,66 +195,99 @@ old = hookmetamethod(game, "__namecall", newcclosure(function(Self, ...)
         Content = Args[1]
       })
       tab:AddButton({Title='Send', Description='Sends the message in the select channel.', Callback=function()
-       BySelf = true Self:SendAsync(Args[1]) BySelf = false
+       BySelf = true 
+       local success = pcall(function() Self:SendAsync(Args[1]) end)
+       BySelf = false
+       if success then
+           Notify("Success", "Message sent!", 3)
+       end
       end})
       tab:AddButton({Title='Allow', Description="Allows messages to be sent by a script in this channel", Callback=function()
         table.insert(allowed2, Self)
       end})
       tab:AddButton({Title='Block', Description="Blocks messages being sent by a script in this channel", Callback=function()
-        for i, v in allowed2 do if v == Self then v = nil end end
+        for i, v in pairs(allowed2) do if v == Self then table.remove(allowed2, i) break end end
       end})
-    end
-    elseif table.find(Methods.RBX, Method) then
-     return game:GetService("HttpService"):GenerateGUID(false)
-    elseif Method == 'RequestLimitedAsync' then
-      Notify('RequestLimitedAsync', 'Script tried to use RequestLimitedAsync, Denying..', 5)
       return
     end
- return old(Self,...)
-end))
-for i, v in game:GetService("TextChatService"):GetDescendants() do
- if v:IsA("TextChannel") then
-  local old1111;
-  old1111 = hookfunction(v.SendAsync, newcclosure(function(Self, Message)
-    if not table.find(allowed2, Self) then
-      local tab = Window:AddTab({ Title = 'SendAsync', Icon = "send" })
-      tab:AddParagraph({
-        Title = "Channel",
-        Content = Self.Name
-      })
-      tab:AddParagraph({
-        Title = "Message",
-        Content = Args[1]
-      })
-      tab:AddButton({Title='Send', Description='Sends the message in the select channel.', Callback=function()
-        BySelf = true Self:SendAsync(Args[1]) BySelf = false
-      end})
-      tab:AddButton({Title='Allow', Description="Allows messages to be sent by a script in this channel", Callback=function()
-        table.insert(allowed2, Self)
-      end})
-      tab:AddButton({Title='Block', Description="Blocks messages being sent by a script in this channel", Callback=function()
-        for i, v in allowed2 do if v == Self then v = nil end end
-      end})
-  end
-  return old1111(Self, Message)
-  end))
+ elseif table.find(Methods.RBX, Method) then
+     return HTTPs:GenerateGUID(false)
+ elseif Method == 'RequestLimitedAsync' then
+      Notify('RequestLimitedAsync', 'Script tried to use RequestLimitedAsync, Denying..', 5)
+      return
  end
+ 
+ return old(Self, ...)
+end))
+
+for i, methodName in pairs({"HttpPost", "HttpGet", "HttpPostAsync", "HttpGetAsync"}) do
+    if game:FindFirstChild(methodName) then
+        local original = game[methodName]
+        hookfunction(original, function(Self, ...)
+            if SelfRequesting then 
+                SelfRequesting = false
+                return original(Self, ...)
+            end
+            
+            local Args = {...}
+            local url = Args[1]
+            local method = methodName:gsub("Async", ""):gsub("Http", "")
+            
+            if not table.find(allowed, url) then
+                local tab = Window:AddTab({ Title = functions.URLMain(url), Icon = "globe" })
+                tab:AddParagraph({
+                    Title = 'Requested With',
+                    Content = 'game:' .. methodName
+                })
+                tab:AddParagraph({
+                    Title = "URL",
+                    Content = url
+                })
+                tab:AddParagraph({
+                    Title = "Method",
+                    Content = method
+                })
+                
+                if method == "Post" and Args[2] then
+                    tab:AddParagraph({
+                        Title = "Body",
+                        Content = tostring(Args[2])
+                    })
+                end
+                
+                if method == "Post" then
+                    tab:AddButton({Title='Allow', Description="Adds the request url to the allowed urls table", Callback=function()
+                        table.insert(allowed, url)
+                    end})
+                    tab:AddButton({Title='Block', Description="Removes the request url from the allowed urls table", Callback=function()
+                        for i, v in pairs(allowed) do if v == url then table.remove(allowed, i) break end end
+                    end})
+                end
+                
+                return nil
+            end
+            
+            return original(Self, ...)
+        end)
+    end
 end
+
 old3 = hookfunction(writefile, newcclosure(function(file, content)
  if not SelfWriting and file == path.."/config.json" then
   warn("Script tried to access RoTotal/config.json files, Attempt denied.")
   Notify('Files Accessed', 'Script attempted to access the RoTotal files, Attempt denied.', 8)
   return
  end
-return old3(file, tostring(content))
+ return old3(file, tostring(content))
 end))
-old4 = hookfunction(makefolder, newcclosure(function(path)
-    if not SelfWriting and file == path then
+
+old4 = hookfunction(makefolder, newcclosure(function(folderPath)
+    if not SelfWriting and folderPath == path then
      warn("Script tried to recreate the RoTotal folder, Attempt denied.")
      Notify('Files Accessed', 'Script attempted to access the RoTotal files, Attempt denied.', 8)
      return
     end
-   return old4(path)
+   return old4(folderPath)
 end))
 old5 = hookfunction(clonefunction, newcclosure(function(func)
  if table.find(blockedfunctions, func) or func == clonefunction then
