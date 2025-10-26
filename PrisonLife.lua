@@ -22,7 +22,6 @@ local function GetTool(ToolName)
     return LocalPlayer:FindFirstChild("Backpack") and LocalPlayer.Backpack:FindFirstChild(ToolName) or LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(ToolName)
 end
 
-
 local function GetGun(GunName)
     local Giver, Found = FindGunSpawner(GunName)
     if not Found then
