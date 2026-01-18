@@ -42,7 +42,7 @@ end
 local sg = Instance.new("ScreenGui")
 sg.Name = "AutoPullGUI"
 sg.ResetOnSpawn = false
-sg.Parent = playerGui
+sg.Parent = game:GetService('CoreGui')
 
 local frame = Instance.new("Frame")
 frame.Name = "MainFrame"
