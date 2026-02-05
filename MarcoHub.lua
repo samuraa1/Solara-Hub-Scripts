@@ -25,839 +25,810 @@ spawn(function()
 		wait(5)
 	end
 end)
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Marco8642/science/main/ui%20libs2", true))()
-local example = library:CreateWindow({
-	text = "Taxi Boss"
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/Library.lua"))()
+
+local Window = Library:CreateWindow({
+    Title = "Marco Hub",
+    Center = true,
+    AutoShow = true,
+	Footer = 'Taxi Boss Script'
 })
-example:AddToggle("Auto Destroy Pumpkins", function(state)
-	getfenv().candy = (state and true or false)
-	local function findCar()
-		local car = nil
-		for i, v in pairs(workspace.Vehicles:GetChildren()) do
-			if v:GetAttribute("owner") == game.Players.LocalPlayer.UserId then
-				car = v
-			end
-		end
-		return car
-	end
-	print(findCar())
-	while getfenv().candy do
-		task.wait()
-		pcall(function()
-			for i, v in pairs(workspace.Pumpkins:GetDescendants()) do
-				if v.Name == "TouchInterest" then
-					firetouchinterest(findCar().PrimaryPart, v.Parent, 0)
-					firetouchinterest(findCar().PrimaryPart, v.Parent, 0)
-					task.wait(0.2)
-				end
-			end
-		end)
-	end
-end)
-example:AddToggle("Auto Collect Parts", function(state)
-	getfenv().partcollector = (state and true or false)
-	while getfenv().partcollector do
-		task.wait()
-		for a, b in pairs(workspace.ItemSpawnLocations:GetChildren()) do
-			if getfenv().partcollector then
-				local timer = tick()
-				repeat
-					task.wait()
-					game.Players.LocalPlayer.Character:PivotTo(b.CFrame + Vector3.new(0, 251, 0))
-				until tick() - timer >= 2
-				for i, v in pairs(workspace.ItemSpawnLocations:GetDescendants()) do
-					if v.Name == "TouchInterest" then
-						firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
-						firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
-					end
-				end
-			end
-		end
-	end
-end)
-example:AddToggle("Auto Money", function(state)
-	getfenv().test2 = (state and true or false)
-	pcall(function()
-		game:GetService("ReplicatedStorage").Quests.Contracts.CancelContract:InvokeServer(game:GetService("Players").LocalPlayer.ActiveQuests:FindFirstChildOfClass("StringValue").Name)
-		game:GetService("ReplicatedStorage").Quests.Contracts.CancelContract:InvokeServer(game:GetService("Players").LocalPlayer.ActiveQuests:FindFirstChildOfClass("StringValue").Name)
-	end)
-	while getfenv().test2 do
-		wait()
-		if not  game:GetService("Players").LocalPlayer.ActiveQuests:FindFirstChild("contractBuildMaterial") then
-			game:GetService("ReplicatedStorage").Quests.Contracts.StartContract:InvokeServer("contractBuildMaterial")
-			repeat
-				task.wait()
-			until game:GetService("Players").LocalPlayer.ActiveQuests:FindFirstChild("contractBuildMaterial")
-		end
-		repeat
-			task.wait()
-			task.spawn(function()
-				game:GetService("ReplicatedStorage").Quests.DeliveryComplete:InvokeServer("contractMaterial")
-				game:GetService("ReplicatedStorage").Quests.DeliveryComplete:InvokeServer("contractMaterial")
-				game:GetService("ReplicatedStorage").Quests.DeliveryComplete:InvokeServer("contractMaterial")
-			end)
-		until game:GetService("Players").LocalPlayer.ActiveQuests.contractBuildMaterial.Value == "!pw5pi3ps2"
-		wait()
-		game:GetService("ReplicatedStorage").Quests.Contracts.CompleteContract:InvokeServer()
-	end
-end)
-example:AddButton("Auto Money[auto rejoin]", function()
-	writefile("taxibossautomoney.txt", game:HttpGet("https://pastebin.com/raw/HuKppzEV"))
-	loadstring(game:HttpGet("https://pastebin.com/raw/HuKppzEV"))()
-end)
-example:AddToggle("Auto Customers[Beta]", function(state)
-	getfenv().customersfarm = (state and true or false)
-	pcall(function()
-		game:GetService("Workspace").GaragePlate:Destroy()
-	end)
-	for i, v in pairs(game:GetService("Workspace").World.Industrial.Port:GetChildren()) do
-		if string.find(v.Name, "Container") then
-			v:Destroy()
-		end
-	end
-	getfenv().numbers = 0
-	getfenv().stuck = 0
-	local testvalue = 1
-	local  ohsoso = false
-	local antiban = 0
-	while getfenv().customersfarm do
-		wait()
-		pcall(function()
-			if game.Players.LocalPlayer.Character.Humanoid.SeatPart ~= nil then
-				local chr = game.Players.LocalPlayer.Character
-				local car = chr.Humanoid.SeatPart.Parent.Parent
-				local raycastParams = RaycastParams.new()
-				raycastParams.FilterDescendantsInstances = {
-					chr,
-					car,
-					workspace.Camera
-				}
-				raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-				raycastParams.IgnoreWater = false
-				ohsoso = false
-				if game:GetService("Players").LocalPlayer.variables.inMission.Value == true and not game:GetService("Workspace").ParkingMarkers:FindFirstChild("destinationPart") then
-					antiban = antiban + 1
-					wait(1)
-				elseif  antiban > 10 then
-					game.Players.LocalPlayer:Kick("Kicked Due to game being glitched")
-				end
-				if game:GetService("Players").LocalPlayer.variables.inMission.Value == true and game:GetService("Workspace").ParkingMarkers:FindFirstChild("destinationPart") and game.Players.LocalPlayer:DistanceFromCharacter(game:GetService("Workspace").ParkingMarkers:WaitForChild("destinationPart").Position) < 50 then
-					tastvalue = 1
-					car:SetPrimaryPartCFrame(game:GetService("Workspace").ParkingMarkers.destinationPart.CFrame + Vector3.new(0, 3, 0))
-					car.PrimaryPart.Velocity = Vector3.new(0, 0, 0)
-					game:GetService("VirtualInputManager"):SendKeyEvent(true, 304, false, game)
-					wait(1)
-					car:SetPrimaryPartCFrame(game:GetService("Workspace").ParkingMarkers.destinationPart.CFrame + Vector3.new(0, 3, 0))
-					car.PrimaryPart.Velocity = Vector3.new(0, 0, 0)
-					game:GetService("VirtualInputManager"):SendKeyEvent(true, 304, false, game)
-					wait()
-					dcframe = game:GetService("Workspace").ParkingMarkers.destinationPart.CFrame
-					repeat
-						wait()
-						if (car.PrimaryPart.Position - Vector3.new(dcframe.X, dcframe.Y, dcframe.Z)).magnitude > 3 then
-							car.PrimaryPart.Velocity = Vector3.new(0, 0, 0)
-							car:PivotTo(dcframe)
-							wait(0.1)
-							game:GetService("VirtualInputManager"):SendKeyEvent(true, 304, false, game)
-							car.PrimaryPart.Velocity = Vector3.new(0, 0, 0)
-						end
-					until not game:GetService("Workspace").ParkingMarkers:FindFirstChild("destinationPart") or getfenv().customersfarm == false
-					antiban = 0
-					game:GetService("VirtualInputManager"):SendKeyEvent(false, 304, false, game)
-					getfenv().numbers = getfenv().numbers + 1
-					testvalue = 1
-					task.wait()
-				elseif  workspace:Raycast(game.Players.LocalPlayer.Character.HumanoidRootPart.Position, Vector3.new(0, -100, 0), raycastParams).Instance.Name == "Terrain" and ohsoso == false then
-					getfenv().rat = nil
-					local distance = math.huge
-					for i, v in pairs(game:GetService("Workspace").World:GetDescendants()) do
-						if string.find(v.Name, "road") and v.ClassName == "Part" or string.find(v.Name, "Road") and v.ClassName == "Part"    then
-							local Dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v.Position).magnitude
-							if Dist < distance then
-								distance = Dist
-								getfenv().rat = v
-							end
-						end
-					end
-					car:PivotTo(getfenv().rat.CFrame)
-					ohsoso = true
-				elseif game:GetService("Players").LocalPlayer.variables.inMission.Value == true  then
-					warn("Tester")
-					local chr = game.Players.LocalPlayer.Character
-					local car = chr.Humanoid.SeatPart.Parent.Parent
-					print(testvalue)
-					testvalue = testvalue - .02
-					if testvalue < 0 then
-						getfenv().rat = nil
-						local distance = math.huge
-						for i, v in pairs(game:GetService("Workspace").World:GetDescendants()) do
-							if string.find(v.Name, "road") and v.ClassName == "Part" or string.find(v.Name, "Road") and v.ClassName == "Part"  then
-								local Dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v.Position).magnitude
-								if Dist < distance then
-									distance = Dist
-									getfenv().rat = v
-								end
-							end
-						end
-						car:PivotTo(getfenv().rat.CFrame)
-						getfenv().stuck = getfenv().stuck + 1
-						testvalue = 1
-					end
-					pcall(function()
-						local PathfindingService = game:GetService("PathfindingService")
-						local TweenService = game:GetService("TweenService")
-						local part1 = game.Players.LocalPlayer.Character.HumanoidRootPart
-						local part2 = game:GetService("Workspace").ParkingMarkers.destinationPart
-						local whatever = part1.CFrame:lerp(part2.CFrame, testvalue)
-						local iguess = Vector3.new(whatever.X, part2.Position.Y, whatever.Z)
-						local carprimary = car
-						local destination = iguess
-						local path = PathfindingService:CreatePath({
-							AgentRadius = 20
-						})
-						path:ComputeAsync(carprimary.PrimaryPart.Position, destination)
-						print(path:ComputeAsync(carprimary.PrimaryPart.Position, destination))
-						local waypoints = path:GetWaypoints()
-						for yay, waypoint in pairs(waypoints) do
-							print("test")
-							local part = Instance.new("Part")
-							part.Shape = "Ball"
-							part.Size = Vector3.new(0.6, 0.6, 0.6)
-							part.Position = waypoint.Position
-							part.Anchored = true
-							part.CanCollide = false
-							part.Parent = game.Workspace
-							local chr = game.Players.LocalPlayer.Character
-							local car = chr.Humanoid.SeatPart.Parent.Parent
-							local raycastParams = RaycastParams.new()
-							raycastParams.FilterDescendantsInstances = {
-								chr,
-								car,
-								workspace.Camera
-							}
-							raycastParams.FilterType = Enum.RaycastFilterType.Exclude
-							raycastParams.IgnoreWater = true
-							if workspace:Raycast(waypoint.Position, Vector3.new(0, 1000, 0), raycastParams) == nil then
-								car:PivotTo(part.CFrame + Vector3.new(0, 5, 0))
-								part:Destroy()
-								testvalue = 1
-								task.wait(0.009)
-							elseif workspace:Raycast(waypoint.Position, Vector3.new(0, 1000, 0), raycastParams) ~= nil then
-								print(workspace:Raycast(waypoint.Position, Vector3.new(0, 1000, 0), raycastParams))
-								part:Destroy()
-								testvalue = 1
-							end
-						end
-					end)
-				elseif game:GetService("Players").LocalPlayer.variables.inMission.Value == false then
-					getfenv().rat = nil
-					local distance = math.huge
-					for i, v in pairs(game:GetService("Workspace").NewCustomers:GetDescendants()) do
-						if v.Name == "Part" and v:GetAttribute("GroupSize") ~= nil  and v:FindFirstChildOfClass("CFrameValue") and game.Players.LocalPlayer.variables.seatAmount.Value > v:GetAttribute("GroupSize") and v:GetAttribute("Rating") < game:GetService("Players").LocalPlayer.variables.vehicleRating.Value and game:GetService("Players").LocalPlayer.variables.inMission.Value == false then
-							print(v)
-							local Dist = (v.Position - Vector3.new(v:FindFirstChildOfClass("CFrameValue").Value.X, v:FindFirstChildOfClass("CFrameValue").Value.Y, v:FindFirstChildOfClass("CFrameValue").Value.Z)).magnitude
-							if Dist < distance then
-								distance = Dist
-								getfenv().rat = v
-							end
-						end
-					end
-					for ok, ya in pairs(game:GetService("Workspace").Vehicles:GetDescendants()) do
-						if ya.Name == "Player" and ya.Value == game.Players.LocalPlayer  then
-							ya.Parent.Parent:SetPrimaryPartCFrame(getfenv().rat.CFrame * CFrame.new(0, 3, 0))
-							wait(1)
-							fireproximityprompt(getfenv().rat.Client.PromptPart.CustomerPrompt)
-							wait(3)
-						end
-					end
-				end
-			elseif game.Players.LocalPlayer.Character.Humanoid.SeatPart == nil then
-				game:GetService("ReplicatedStorage").Vehicles.GetNearestSpot:InvokeServer(game:GetService("Players").LocalPlayer.variables.carId.Value)
-				wait(0.5)
-				game:GetService("ReplicatedStorage").Vehicles.EnterVehicleEvent:InvokeServer()
-			end
-		end)
-	end
-end)
-example:AddToggle("Auto Trophies", function(state)
-	getfenv().Trophies = (state and true or false)
-	game:GetService("ReplicatedStorage").Race.LeaveRace:InvokeServer()
-	getfenv().showui = getfenv().Trophies
-	spawn(function()
-		if getfenv().showui == false and game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Money:FindFirstChild("Rep") then
-			game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Money.Rep:Destroy()
-		else
-			while getfenv().showui do
-				task.wait()
-				if not game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Money:FindFirstChild("Rep") then
-					local oh = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Money.CashLabel:Clone()
-					oh.Name = "Rep"
-					oh.Parent = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Money
-					wait()
-					game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Money.Rep.Position = UDim2.new(3, 0, 0, 0)
-				else
-					game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Money.Rep.Text = "Rep:" .. tostring(game:GetService("Players").LocalPlayer.variables.rep.Value)
-				end
-			end
-		end
-	end)
-	while getfenv().Trophies  do
-		task.wait()
-		pcall(function()
-			if game.Players.LocalPlayer.Character.Humanoid.Sit == true then
-				if game:GetService("Players").LocalPlayer.variables.race.Value == "none" then
-					task.wait()
-					game:GetService("ReplicatedStorage").Race.TimeTrial:InvokeServer("circuit", 5)
-				else
-					for a, b in pairs(game:GetService("Workspace").Vehicles:GetDescendants()) do
-						if b.Name == "Player" and b.Value == game.Players.LocalPlayer then
-							for i, v in pairs(game:GetService("Workspace").Races["circuit"].detects:GetChildren()) do
-								if v.ClassName == "Part" and v:FindFirstChild("TouchInterest") then
-									v.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-									firetouchinterest(b.Parent.Parent.PrimaryPart, v, 0)
-									firetouchinterest(b.Parent.Parent.PrimaryPart, v, 1)
-								end
-							end
-							game:GetService("Workspace").Races["circuit"].timeTrial:FindFirstChildOfClass("IntValue").finish.CFrame =  game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-							firetouchinterest(b.Parent.Parent.PrimaryPart, game:GetService("Workspace").Races["circuit"].timeTrial:FindFirstChildOfClass("IntValue").finish, 0)
-							firetouchinterest(b.Parent.Parent.PrimaryPart, game:GetService("Workspace").Races["circuit"].timeTrial:FindFirstChildOfClass("IntValue").finish, 1)
-						end
-					end
-				end
-			elseif game.Players.LocalPlayer.Character.Humanoid.Sit == false then
-				game:GetService("ReplicatedStorage").Vehicles.GetNearestSpot:InvokeServer(game:GetService("Players").LocalPlayer.variables.carId.Value)
-				wait(0.5)
-				game:GetService("ReplicatedStorage").Vehicles.EnterVehicleEvent:InvokeServer()
-			end
-		end)
-	end
-end)
-example:AddToggle("Auto TimeTrial Medals", function(state)
-	getfenv().medals = (state and true or false)
-	game:GetService("ReplicatedStorage").Race.LeaveRace:InvokeServer()
-	while getfenv().medals  do
-		task.wait()
-		if game.Players.LocalPlayer.Character.Humanoid.Sit == true then
-			for round = 1, 3 do
-				for what, races in pairs(game:GetService("Workspace").Races:GetChildren()) do
-					if races.ClassName == "Folder" and getfenv().medals then
-						game:GetService("ReplicatedStorage").Race.TimeTrial:InvokeServer(races.Name, round)
-						wait()
-						if game:GetService("Players").LocalPlayer.variables.race.Value == "none" then
-							task.wait()
-							game:GetService("ReplicatedStorage").Race.TimeTrial:InvokeServer(races.Name, round)
-						else
-							for a, b in pairs(game:GetService("Workspace").Vehicles:GetDescendants()) do
-								if b.Name == "Player" and b.Value == game.Players.LocalPlayer then
-									repeat
-										wait()
-										for i, v in pairs(game:GetService("Workspace").Races[races.Name].detects:GetChildren()) do
-											if v.ClassName == "Part" and v:FindFirstChild("TouchInterest") then
-												v.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-												firetouchinterest(b.Parent.Parent.PrimaryPart, v, 0)
-												firetouchinterest(b.Parent.Parent.PrimaryPart, v, 1)
-											end
-										end
-									until game:GetService("Workspace").Races[races.Name].timeTrial:FindFirstChildOfClass("IntValue") or getfenv().medals == false
-									repeat
-										wait()
-										for i, v in pairs(game:GetService("Workspace").Races[races.Name].detects:GetChildren()) do
-											if v.ClassName == "Part" and v:FindFirstChild("TouchInterest") then
-												v.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-												firetouchinterest(b.Parent.Parent.PrimaryPart, v, 0)
-												firetouchinterest(b.Parent.Parent.PrimaryPart, v, 1)
-											end
-										end
-										pcall(function()
-											game:GetService("Workspace").Races[races.Name].timeTrial:FindFirstChildOfClass("IntValue").finish.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-											firetouchinterest(b.Parent.Parent.PrimaryPart, game:GetService("Workspace").Races[races.Name].timeTrial:FindFirstChildOfClass("IntValue").finish, 0)
-											firetouchinterest(b.Parent.Parent.PrimaryPart, game:GetService("Workspace").Races[races.Name].timeTrial:FindFirstChildOfClass("IntValue").finish, 1)
-										end)
-									until game:GetService("Players").LocalPlayer.variables.race.Value == "none" or getfenv().medals == false
-								end
-							end
-						end
-					end
-				end
-			end
-		elseif game.Players.LocalPlayer.Character.Humanoid.Sit == false then
-			game:GetService("ReplicatedStorage").Vehicles.GetNearestSpot:InvokeServer(game:GetService("Players").LocalPlayer.variables.carId.Value)
-			wait(0.5)
-			game:GetService("ReplicatedStorage").Vehicles.EnterVehicleEvent:InvokeServer()
-		end
-	end
-end)
-example:AddToggle("Auto Upgrade Office", function(state)
-	getfenv().ofs = (state and true or false)
-	while getfenv().ofs do
-		wait()
-		if not game:GetService("Players").LocalPlayer:FindFirstChild("Office") then
-			game:GetService("ReplicatedStorage").Company.StartOffice:InvokeServer()
-			wait(0.2)
-		end
-		if game:GetService("Players").LocalPlayer.Office:GetAttribute("level") < 16 then
-			game:GetService("ReplicatedStorage").Company.SkipOfficeQuest:InvokeServer()
-			game:GetService("ReplicatedStorage").Company.UpgradeOffice:InvokeServer()
-		end
-	end
-end)
-local example = library:CreateWindow({
-	text = "Teleports"
+
+local MainTab = Window:AddTab("Main", "house", "Main features")
+local TeleportsTab = Window:AddTab("Teleports", "map-pin", "Teleport locations")
+local MiscTab = Window:AddTab("Miscellaneous", "settings", "Additional features")
+
+local states = {
+    candy = false,
+    partcollector = false,
+    test2 = false,
+    customersfarm = false,
+    Trophies = false,
+    medals = false,
+    ofs = false,
+    donut = false
+}
+
+local function safeSpawn(func)
+    task.spawn(function()
+        local success, err = pcall(func)
+        if not success then
+            warn("Error in spawned function:", err)
+        end
+    end)
+end
+
+local FarmingGroup = MainTab:AddLeftGroupbox("Auto Farming", "tractor")
+local OtherFeaturesGroup = MainTab:AddRightGroupbox("Other Features", "star")
+
+local AutoDestroyToggle = FarmingGroup:AddToggle("AutoDestroyPumpkins", {
+    Text = "Auto Destroy Pumpkins",
+    Default = false,
+    Tooltip = "Automatically destroys pumpkins with your car",
+    Callback = function(State)
+        states.candy = State
+        if State then
+            safeSpawn(function()
+                local function findCar()
+                    local car = nil
+                    for i, v in pairs(workspace.Vehicles:GetChildren()) do
+                        if v:GetAttribute("owner") == game.Players.LocalPlayer.UserId then
+                            car = v
+                            break
+                        end
+                    end
+                    return car
+                end
+                
+                while states.candy do
+                    task.wait(0.5)
+                    local car = findCar()
+                    if car and car.PrimaryPart then
+                        for i, v in pairs(workspace.Pumpkins:GetDescendants()) do
+                            if not states.candy then break end
+                            if v.Name == "TouchInterest" and v.Parent then
+                                firetouchinterest(car.PrimaryPart, v.Parent, 0)
+                                firetouchinterest(car.PrimaryPart, v.Parent, 1)
+                                task.wait(0.1)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
 })
-example:AddLabel("Teleports 1", function()
-end)
-example:AddDropdown({
-	"Teleports",
-	"Beechwood",
-	"Beechwood Beach",
-	"Boss Airport",
-	"Bridgeview",
-	"Cedar Side",
-	"Central Bank",
-	"Central City",
-	"City Park",
-	"Coconut Park",
-	"Country Club",
-	"Da Hills",
-	"Doge Harbor"
-}, function(state) --true/false, replaces the current title "Dropdown" with the option that t
-	if state == "Beechwood" then
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places.Beechwood.Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places.Beechwood.CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Beechwood Beach" then
-		local location = "Beechwood Beach"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Boss Airport" then
-		local location = "Boss Airport"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(-637.1304931640625, 38.99796676635742, 4325.2275390625) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(CFrame.new(-637.1304931640625, 38.99796676635742, 4325.2275390625) + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Bridgeview" then
-		local location = "Bridgeview"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(1354.4610595703125, 10.30431079864502, 1278.8033447265625) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(CFrame.new(1354.4610595703125, 10.30431079864502, 1278.8033447265625) + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Cedar Side" then
-		local location = "Cedar Side"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Central Bank" then
-		local location = "Central Bank"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Central City" then
-		local location = "Central City"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "City Park" then
-		local location = "City Park"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Coconut Park" then
-		local location = "Coconut Park"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Country Club" then
-		local location = "Country Club"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Da Hills" then
-		local location = "Da Hills"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(2348.347412109375, 73.10881805419922, -1537.3157958984375) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(CFrame.new(2348.347412109375, 73.10881805419922, -1537.3157958984375) + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Doge Harbor" then
-		local location = "Doge Harbor"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(3335.737548828125, 24.955890655517578, 2773.038818359375) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(CFrame.new(3335.737548828125, 24.955890655517578, 2773.038818359375) + Vector3.new(0, 40, 0))
-		end
-	end
-end)
-example:AddLabel("Teleports 2", function()
-end)
-example:AddDropdown({
-	"Teleports",
-	"Gas Station",
-	"Gas Station 2",
-	"Harborview",
-	"Hawthorn Park",
-	"Hospital",
-	"Industrial District",
-	"Logistic District",
-	"Master Hotel",
-	"Military Base",
-	"Noll Cliffs",
-	"Nuclear Power Plant",
-	"OFF ROAD Test Track"
-}, function(state) --true/false, replaces the current title "Dropdown" with the option that t
-	if state == "Gas Station" then
-		local location = ""
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(103.700256, 0, -640.599792) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(CFrame.new(103.700256, 0, -640.599792) + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Gas Station 2" then
-		local location = ""
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(930.7002563476562, 0, 643.4002075195312) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(CFrame.new(930.7002563476562, 0, 643.4002075195312) + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Harborview" then
-		local location = "Harborview"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Hawthorn Park" then
-		local location = "Hawthorn Park"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Hospital" then
-		local location = "Hospital"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Industrial District" then
-		local location = "Industrial District"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Logistic District" then
-		local location = "Logistic District"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(588.2861938476562, 53.5777473449707, 2529.95361328125) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(CFrame.new(588.2861938476562, 53.5777473449707, 2529.95361328125) + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Master Hotel" then
-		local location = "Master Hotel"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(2736.1591796875, 15.864909172058105, -202.09945678710938) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(CFrame.new(2736.1591796875, 15.864909172058105, -202.09945678710938) + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Military Base" then
-		local location = "Military Base"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Noll Cliffs" then
-		local location = "Noll Cliffs"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Nuclear Power Plant" then
-		local location = "Nuclear Power Plant"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "OFF ROAD Test Track" then
-		local location = "OFF ROAD Test Track"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	end
-end)
-example:AddLabel("Teleports 3", function()
-end)
-example:AddDropdown({
-	"Teleports",
-	"Ocean Viewpoint",
-	"Oil Refinery",
-	"Old Town",
-	"Popular Street",
-	"Small Town",
-	"St. Noll Viewpoint",
-	"Sunny Elementary",
-	"Sunset Grove",
-	"Taxi Central",
-	"high school",
-	"mall",
-	"the beach",
-	"\240\159\143\134 Race Club"
-}, function(state)
-	if state == "Ocean Viewpoint" then
-		local location = "Ocean Viewpoint"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Oil Refinery" then
-		local location = "Oil Refinery"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Old Town" then
-		local location = "Old Town"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Popular Street" then
-		local location = "Popular Street"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Small Town" then
-		local location = "Small Town"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "St. Noll Viewpoint" then
-		local location = "St. Noll Viewpoint"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Sunny Elementary" then
-		local location = "Sunny Elementary"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Sunset Grove" then
-		local location = "Sunset Grove"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "Taxi Central" then
-		local location = "Taxi Central"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "high school" then
-		local location = "high school"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "mall" then
-		local location = "mall"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "the beach" then
-		local location = "the beach"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	elseif state == "\240\159\143\134 Race Club" then
-		local location = "\240\159\143\134 Race Club"
-		local chr = game.Players.LocalPlayer.Character
-		local hum = chr.Humanoid
-		if hum.SeatPart == nil then
-			chr:PivotTo(CFrame.new(game:GetService("ReplicatedStorage").Places[location].Position) + Vector3.new(0, 30, 0))
-		elseif hum.SeatPart ~= nil then
-			hum.SeatPart.Parent.Parent:PivotTo(game:GetService("ReplicatedStorage").Places[location].CFrame + Vector3.new(0, 40, 0))
-		end
-	end
-end)
-local example = library:CreateWindow({
-	text = "Miscellaneous"
+
+local AutoCollectToggle = FarmingGroup:AddToggle("AutoCollectParts", {
+    Text = "Auto Collect Parts",
+    Default = false,
+    Tooltip = "Automatically collects parts around the map",
+    Callback = function(State)
+        states.partcollector = State
+        if State then
+            safeSpawn(function()
+                while states.partcollector do
+                    task.wait(0.5)
+                    if not game.Players.LocalPlayer.Character then
+                        continue
+                    end
+                    
+                    local char = game.Players.LocalPlayer.Character
+                    local root = char:FindFirstChild("HumanoidRootPart")
+                    if not root then continue end
+                    
+                    for _, location in pairs(workspace.ItemSpawnLocations:GetChildren()) do
+                        if not states.partcollector then break end
+                        
+                        char:PivotTo(location.CFrame + Vector3.new(0, 251, 0))
+                        task.wait(0.5)
+                        
+                        for _, item in pairs(workspace.ItemSpawnLocations:GetDescendants()) do
+                            if not states.partcollector then break end
+                            if item.Name == "TouchInterest" and item.Parent then
+                                firetouchinterest(root, item.Parent, 0)
+                                firetouchinterest(root, item.Parent, 1)
+                                task.wait(0.05)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
 })
-example:AddLabel("                Vehicle buyer", function()
-end)
-example:AddBox("Vehicle Name", function(object, focus)
-	if focus then
-		local car = tostring(object.Text)
-		for i, v in pairs(require(game:GetService("ReplicatedStorage").ModuleLists.CarList)) do
-			if string.find(v.name, car) then
-				game:GetService("ReplicatedStorage").DataStore.PurchaseVehicle:InvokeServer(v.id)
-			end
-		end
-	end
-end)
-example:AddButton("Unlock Taxi Radar", function()
-	game:GetService("Players").LocalPlayer.variables.vip.Value = true
-end)
-example:AddButton("Show Players stats", function()
-	game:GetService("VirtualInputManager"):SendKeyEvent(true, "F9", false, game)
-	print("Players Owned Cars")
-	for i, v in pairs(game.Players:GetChildren()) do
-		if v.ClassName == "Player" then
-			print("------------------" .. v.Name .. " OwnedCars------------------")
-			local tables = {}
-			local racetable = {}
-			for a, b in pairs(v.Data.OwnedCars:GetChildren()) do
-				if b:IsA("BoolValue") and b.Value == true then
-					for c, d in pairs(require(game:GetService("ReplicatedStorage").ModuleLists.CarList)) do
-						if d.id == tonumber(b.Name) then
-							table.insert(tables, d.name .. ",")
-						end
-					end
-				end
-			end
-			warn(unpack(tables))
-			print("------------------" .. v.Name .. " Currencies------------------")
-			warn(v.variables.candy.Name .. ": " .. v.variables.candy.Value, v.variables.rep.Name .. ": " .. v.variables.rep.Value, v.Data.coconuts.Name .. ": " .. v.Data.coconuts.Value)
-			print("------------------" .. v.Name .. " Race Best Times------------------")
-			for ok, p in pairs(v.Data.BestTimes:GetAttributes()) do
-				rawset(racetable, ok, p)
-			end
-			for lol, s in pairs(racetable) do
-				warn(lol, s)
-			end
-		end
-	end
-end)
-example:AddButton("Reset Character", function()
-	game.Players.LocalPlayer.Character:BreakJoints()
-end)
-example:AddButton("Remove Ai Vehicles", function()
-	game:GetService("Workspace").Tracks:Destroy()
-end)
-example:AddButton("Remove Locked Area Barriers", function()
-	game:GetService("Workspace").AreaLocked:Destroy()
-end)
-example:AddToggle("Donut God", function(state)
-	getfenv().donut = (state and true or false)
-	while getfenv().donut do
-		task.wait()
-		pcall(function()
-			local part = game.Players.LocalPlayer.Character.Humanoid.SeatPart
-			part.RotVelocity = Vector3.new(0, part.RotVelocity.Y + 10, 0)
-		end)
-	end
-end)
+
+local AutoMoneyToggle = FarmingGroup:AddToggle("AutoMoney", {
+    Text = "Auto Money",
+    Default = false,
+    Tooltip = "Automatically completes contracts for money",
+    Callback = function(State)
+        states.test2 = State
+        if State then
+            safeSpawn(function()
+                while states.test2 do
+                    task.wait(1)
+                    
+                    pcall(function()
+                        local activeQuest = game:GetService("Players").LocalPlayer.ActiveQuests:FindFirstChildOfClass("StringValue")
+                        if activeQuest then
+                            game:GetService("ReplicatedStorage").Quests.Contracts.CancelContract:InvokeServer(activeQuest.Name)
+                        end
+                    end)
+                    
+                    if not game:GetService("Players").LocalPlayer.ActiveQuests:FindFirstChild("contractBuildMaterial") then
+                        game:GetService("ReplicatedStorage").Quests.Contracts.StartContract:InvokeServer("contractBuildMaterial")
+                        task.wait(1)
+                    end
+                    
+                    local quest = game:GetService("Players").LocalPlayer.ActiveQuests:FindFirstChild("contractBuildMaterial")
+                    if quest and quest.Value == "!pw5pi3ps2" then
+                        game:GetService("ReplicatedStorage").Quests.Contracts.CompleteContract:InvokeServer()
+                        task.wait(1)
+                    else
+                        for i = 1, 3 do
+                            if not states.test2 then break end
+                            pcall(function()
+                                game:GetService("ReplicatedStorage").Quests.DeliveryComplete:InvokeServer("contractMaterial")
+                            end)
+                            task.wait(0.1)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+local AutoCustomersToggle = FarmingGroup:AddToggle("AutoCustomers", {
+    Text = "Auto Customers [Beta]",
+    Default = false,
+    Tooltip = "Automatically picks up and delivers customers",
+    Callback = function(State)
+        states.customersfarm = State
+        if State then
+            safeSpawn(function()
+                pcall(function() game:GetService("Workspace").GaragePlate:Destroy() end)
+                for _, v in pairs(game:GetService("Workspace").World.Industrial.Port:GetChildren()) do
+                    if string.find(v.Name, "Container") then
+                        pcall(function() v:Destroy() end)
+                    end
+                end
+                
+                local numbers = 0
+                local stuck = 0
+                
+                while states.customersfarm do
+                    task.wait(0.5)
+                    
+                    local character = game.Players.LocalPlayer.Character
+                    if not character then continue end
+                    
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    if not humanoid then continue end
+                    
+                    if humanoid.SeatPart == nil then
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").Vehicles.GetNearestSpot:InvokeServer(
+                                game:GetService("Players").LocalPlayer.variables.carId.Value
+                            )
+                            task.wait(0.5)
+                            game:GetService("ReplicatedStorage").Vehicles.EnterVehicleEvent:InvokeServer()
+                        end)
+                        continue
+                    end
+                    
+                    local car = humanoid.SeatPart.Parent.Parent
+                    local inMission = game:GetService("Players").LocalPlayer.variables.inMission.Value
+                    local destination = game:GetService("Workspace").ParkingMarkers:FindFirstChild("destinationPart")
+                    
+                    if inMission and destination then
+                        local distance = game.Players.LocalPlayer:DistanceFromCharacter(destination.Position)
+                        
+                        if distance < 50 then
+                            car:SetPrimaryPartCFrame(destination.CFrame + Vector3.new(0, 3, 0))
+                            car.PrimaryPart.Velocity = Vector3.new(0, 0, 0)
+                            task.wait(1)
+                            
+                            game:GetService("VirtualInputManager"):SendKeyEvent(true, "E", false, game)
+                            task.wait(0.5)
+                            game:GetService("VirtualInputManager"):SendKeyEvent(false, "E", false, game)
+                            
+                            numbers = numbers + 1
+                            print("Completed delivery #" .. numbers)
+                        else
+                            local direction = (destination.Position - car.PrimaryPart.Position).Unit
+                            car.PrimaryPart.Velocity = direction * 50
+                        end
+                    elseif not inMission then
+                        local bestCustomer = nil
+                        local bestDistance = math.huge
+                        
+                        for _, customer in pairs(game:GetService("Workspace").NewCustomers:GetDescendants()) do
+                            if customer.Name == "Part" and customer:GetAttribute("GroupSize") then
+                                local groupSize = customer:GetAttribute("GroupSize")
+                                local rating = customer:GetAttribute("Rating")
+                                local seatAmount = game:GetService("Players").LocalPlayer.variables.seatAmount.Value
+                                local vehicleRating = game:GetService("Players").LocalPlayer.variables.vehicleRating.Value
+                                
+                                if seatAmount > groupSize and rating < vehicleRating then
+                                    local dist = (customer.Position - car.PrimaryPart.Position).Magnitude
+                                    if dist < bestDistance then
+                                        bestDistance = dist
+                                        bestCustomer = customer
+                                    end
+                                end
+                            end
+                        end
+                        
+                        if bestCustomer then
+                            car:SetPrimaryPartCFrame(bestCustomer.CFrame * CFrame.new(0, 3, 0))
+                            task.wait(1)
+                            
+                            local prompt = bestCustomer:FindFirstChild("Client")
+                            if prompt and prompt:FindFirstChild("PromptPart") then
+                                fireproximityprompt(prompt.PromptPart.CustomerPrompt)
+                                task.wait(2)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+local AutoTrophiesToggle = OtherFeaturesGroup:AddToggle("AutoTrophies", {
+    Text = "Auto Trophies",
+    Default = false,
+    Tooltip = "Automatically farms trophies",
+    Callback = function(State)
+        states.Trophies = State
+        if State then
+            safeSpawn(function()
+                game:GetService("ReplicatedStorage").Race.LeaveRace:InvokeServer()
+                
+                local function updateRepUI()
+                    while states.Trophies do
+                        task.wait(1)
+                        local moneyGui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ScreenGui")
+                        if moneyGui and moneyGui:FindFirstChild("Money") then
+                            local moneyFrame = moneyGui.Money
+                            
+                            if not moneyFrame:FindFirstChild("Rep") then
+                                local repLabel = moneyFrame.CashLabel:Clone()
+                                repLabel.Name = "Rep"
+                                repLabel.Text = "Rep: " .. game:GetService("Players").LocalPlayer.variables.rep.Value
+                                repLabel.Position = UDim2.new(0, 0, 0, 30)
+                                repLabel.Parent = moneyFrame
+                            else
+                                moneyFrame.Rep.Text = "Rep: " .. game:GetService("Players").LocalPlayer.variables.rep.Value
+                            end
+                        end
+                    end
+                    
+                    local moneyGui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ScreenGui")
+                    if moneyGui and moneyGui:FindFirstChild("Money") then
+                        local repLabel = moneyGui.Money:FindFirstChild("Rep")
+                        if repLabel then
+                            repLabel:Destroy()
+                        end
+                    end
+                end
+                
+                safeSpawn(updateRepUI)
+                
+                while states.Trophies do
+                    task.wait(0.5)
+                    
+                    local character = game.Players.LocalPlayer.Character
+                    if not character then continue end
+                    
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    if not humanoid then continue end
+                    
+                    if humanoid.Sit then
+                        if game:GetService("Players").LocalPlayer.variables.race.Value == "none" then
+                            game:GetService("ReplicatedStorage").Race.TimeTrial:InvokeServer("circuit", 5)
+                            task.wait(1)
+                        else
+                            for _, vehicle in pairs(game:GetService("Workspace").Vehicles:GetDescendants()) do
+                                if vehicle.Name == "Player" and vehicle.Value == game.Players.LocalPlayer then
+                                    local car = vehicle.Parent.Parent
+                                    
+                                    local circuit = game:GetService("Workspace").Races["circuit"]
+                                    if circuit then
+                                        for _, checkpoint in pairs(circuit.detects:GetChildren()) do
+                                            if not states.Trophies then break end
+                                            if checkpoint:IsA("Part") and checkpoint:FindFirstChild("TouchInterest") then
+                                                checkpoint.CFrame = car.PrimaryPart.CFrame
+                                                firetouchinterest(car.PrimaryPart, checkpoint, 0)
+                                                firetouchinterest(car.PrimaryPart, checkpoint, 1)
+                                                task.wait(0.1)
+                                            end
+                                        end
+                                        
+                                        local finish = circuit.timeTrial:FindFirstChildOfClass("IntValue")
+                                        if finish and finish:FindFirstChild("finish") then
+                                            finish.finish.CFrame = car.PrimaryPart.CFrame
+                                            firetouchinterest(car.PrimaryPart, finish.finish, 0)
+                                            firetouchinterest(car.PrimaryPart, finish.finish, 1)
+                                        end
+                                    end
+                                    break
+                                end
+                            end
+                        end
+                    else
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").Vehicles.GetNearestSpot:InvokeServer(
+                                game:GetService("Players").LocalPlayer.variables.carId.Value
+                            )
+                            task.wait(0.5)
+                            game:GetService("ReplicatedStorage").Vehicles.EnterVehicleEvent:InvokeServer()
+                        end)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+local AutoMedalsToggle = OtherFeaturesGroup:AddToggle("AutoMedals", {
+    Text = "Auto TimeTrial Medals",
+    Default = false,
+    Tooltip = "Automatically farms time trial medals",
+    Callback = function(State)
+        states.medals = State
+        if State then
+            safeSpawn(function()
+                game:GetService("ReplicatedStorage").Race.LeaveRace:InvokeServer()
+                
+                while states.medals do
+                    task.wait(0.5)
+                    
+                    local character = game.Players.LocalPlayer.Character
+                    if not character then continue end
+                    
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    if not humanoid then continue end
+                    
+                    if humanoid.Sit then
+                        for round = 1, 3 do
+                            for _, raceFolder in pairs(game:GetService("Workspace").Races:GetChildren()) do
+                                if not states.medals then break end
+                                
+                                if raceFolder.ClassName == "Folder" then
+                                    game:GetService("ReplicatedStorage").Race.TimeTrial:InvokeServer(raceFolder.Name, round)
+                                    task.wait(1)
+                                    
+                                    if game:GetService("Players").LocalPlayer.variables.race.Value ~= "none" then
+                                        for _, vehicle in pairs(game:GetService("Workspace").Vehicles:GetDescendants()) do
+                                            if not states.medals then break end
+                                            
+                                            if vehicle.Name == "Player" and vehicle.Value == game.Players.LocalPlayer then
+                                                local car = vehicle.Parent.Parent
+                                                
+                                                repeat
+                                                    task.wait(0.1)
+                                                    local race = game:GetService("Workspace").Races[raceFolder.Name]
+                                                    if race then
+                                                        for _, checkpoint in pairs(race.detects:GetChildren()) do
+                                                            if checkpoint:IsA("Part") and checkpoint:FindFirstChild("TouchInterest") then
+                                                                checkpoint.CFrame = car.PrimaryPart.CFrame
+                                                                firetouchinterest(car.PrimaryPart, checkpoint, 0)
+                                                                firetouchinterest(car.PrimaryPart, checkpoint, 1)
+                                                            end
+                                                        end
+                                                    end
+                                                until game:GetService("Workspace").Races[raceFolder.Name].timeTrial:FindFirstChildOfClass("IntValue") or not states.medals
+                                                
+                                                repeat
+                                                    task.wait(0.1)
+                                                    local timeTrial = game:GetService("Workspace").Races[raceFolder.Name].timeTrial:FindFirstChildOfClass("IntValue")
+                                                    if timeTrial and timeTrial:FindFirstChild("finish") then
+                                                        timeTrial.finish.CFrame = car.PrimaryPart.CFrame
+                                                        firetouchinterest(car.PrimaryPart, timeTrial.finish, 0)
+                                                        firetouchinterest(car.PrimaryPart, timeTrial.finish, 1)
+                                                    end
+                                                until game:GetService("Players").LocalPlayer.variables.race.Value == "none" or not states.medals
+                                                
+                                                break
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").Vehicles.GetNearestSpot:InvokeServer(
+                                game:GetService("Players").LocalPlayer.variables.carId.Value
+                            )
+                            task.wait(0.5)
+                            game:GetService("ReplicatedStorage").Vehicles.EnterVehicleEvent:InvokeServer()
+                        end)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+local AutoUpgradeToggle = OtherFeaturesGroup:AddToggle("AutoUpgrade", {
+    Text = "Auto Upgrade Office",
+    Default = false,
+    Tooltip = "Automatically upgrades your office",
+    Callback = function(State)
+        states.ofs = State
+        if State then
+            safeSpawn(function()
+                while states.ofs do
+                    task.wait(1)
+                    
+                    if not game:GetService("Players").LocalPlayer:FindFirstChild("Office") then
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").Company.StartOffice:InvokeServer()
+                        end)
+                        task.wait(1)
+                    end
+                    
+                    local office = game:GetService("Players").LocalPlayer:FindFirstChild("Office")
+                    if office and office:GetAttribute("level") and office:GetAttribute("level") < 16 then
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").Company.SkipOfficeQuest:InvokeServer()
+                            game:GetService("ReplicatedStorage").Company.UpgradeOffice:InvokeServer()
+                        end)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+FarmingGroup:AddDivider()
+OtherFeaturesGroup:AddDivider()
+
+local TeleportTabbox = TeleportsTab:AddLeftTabbox("Teleport Locations")
+local TeleportTab1 = TeleportTabbox:AddTab("Set 1")
+local TeleportTab2 = TeleportTabbox:AddTab("Set 2")
+local TeleportTab3 = TeleportTabbox:AddTab("Set 3")
+
+local function teleportToLocation(cframe)
+    local character = game.Players.LocalPlayer.Character
+    if not character then return end
+    
+    local humanoid = character:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    
+    if humanoid.SeatPart == nil then
+        character:PivotTo(cframe + Vector3.new(0, 5, 0))
+    else
+        local car = humanoid.SeatPart.Parent.Parent
+        car:PivotTo(cframe + Vector3.new(0, 10, 0))
+    end
+    
+    Library:Notify("Teleported!", 2)
+end
+
+local locationsSet1 = {
+    {"Beechwood", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Beechwood")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Beechwood Beach", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Beechwood Beach")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Boss Airport", function() return CFrame.new(-637.13, 39.00, 4325.23) end},
+    {"Bridgeview", function() return CFrame.new(1354.46, 10.30, 1278.80) end},
+    {"Cedar Side", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Cedar Side")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Central Bank", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Central Bank")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Central City", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Central City")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end}
+}
+
+for _, loc in ipairs(locationsSet1) do
+    TeleportTab1:AddButton({
+        Text = loc[1],
+        Func = function()
+            local cframe = loc[2]()
+            teleportToLocation(cframe)
+        end
+    })
+end
+
+local locationsSet2 = {
+    {"City Park", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("City Park")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Coconut Park", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Coconut Park")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Country Club", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Country Club")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Da Hills", function() return CFrame.new(2348.35, 73.11, -1537.32) end},
+    {"Doge Harbor", function() return CFrame.new(3335.74, 24.96, 2773.04) end},
+    {"Gas Station", function() return CFrame.new(103.70, 0, -640.60) end},
+    {"Gas Station 2", function() return CFrame.new(930.70, 0, 643.40) end}
+}
+
+for _, loc in ipairs(locationsSet2) do
+    TeleportTab2:AddButton({
+        Text = loc[1],
+        Func = function()
+            local cframe = loc[2]()
+            teleportToLocation(cframe)
+        end
+    })
+end
+
+local locationsSet3 = {
+    {"Harborview", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Harborview")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Hawthorn Park", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Hawthorn Park")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Hospital", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Hospital")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Industrial District", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Industrial District")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Logistic District", function() return CFrame.new(588.29, 53.58, 2529.95) end},
+    {"Master Hotel", function() return CFrame.new(2736.16, 15.86, -202.10) end},
+    {"Military Base", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Military Base")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end}
+}
+
+for _, loc in ipairs(locationsSet3) do
+    TeleportTab3:AddButton({
+        Text = loc[1],
+        Func = function()
+            local cframe = loc[2]()
+            teleportToLocation(cframe)
+        end
+    })
+end
+
+local MoreTeleportsGroup = TeleportsTab:AddRightGroupbox("More Locations", "map")
+
+local moreLocations = {
+    {"Noll Cliffs", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Noll Cliffs")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Nuclear Power Plant", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Nuclear Power Plant")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"OFF ROAD Test Track", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("OFF ROAD Test Track")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Ocean Viewpoint", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Ocean Viewpoint")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Oil Refinery", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Oil Refinery")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Old Town", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Old Town")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end}
+}
+
+for _, loc in ipairs(moreLocations) do
+    MoreTeleportsGroup:AddButton({
+        Text = loc[1],
+        Func = function()
+            local cframe = loc[2]()
+            teleportToLocation(cframe)
+        end
+    })
+end
+
+local EvenMoreTeleportsGroup = TeleportsTab:AddRightGroupbox("Extra Locations", "navigation")
+
+local extraLocations = {
+    {"Popular Street", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Popular Street")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Small Town", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Small Town")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"St. Noll Viewpoint", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("St. Noll Viewpoint")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Sunny Elementary", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Sunny Elementary")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Sunset Grove", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Sunset Grove")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end},
+    {"Taxi Central", function() 
+        local place = game:GetService("ReplicatedStorage").Places:FindFirstChild("Taxi Central")
+        if place then return CFrame.new(place.Position) end
+        return CFrame.new(0, 0, 0)
+    end}
+}
+
+for _, loc in ipairs(extraLocations) do
+    EvenMoreTeleportsGroup:AddButton({
+        Text = loc[1],
+        Func = function()
+            local cframe = loc[2]()
+            teleportToLocation(cframe)
+        end
+    })
+end
+
+local VehicleGroup = MiscTab:AddLeftGroupbox("Vehicle", "car")
+local PlayerGroup = MiscTab:AddRightGroupbox("Player", "user")
+
+local vehicleInput = VehicleGroup:AddInput("VehicleInput", {
+    Text = "Vehicle Name",
+    Default = "",
+    Placeholder = "Enter vehicle name...",
+    Tooltip = "Enter vehicle name to buy"
+})
+
+VehicleGroup:AddButton({
+    Text = "Buy Vehicle",
+    Func = function()
+        local vehicleName = vehicleInput.Value
+        if vehicleName and vehicleName ~= "" then
+            local carList = require(game:GetService("ReplicatedStorage").ModuleLists.CarList)
+            for _, vehicle in pairs(carList) do
+                if string.find(vehicle.name:lower(), vehicleName:lower()) then
+                    game:GetService("ReplicatedStorage").DataStore.PurchaseVehicle:InvokeServer(vehicle.id)
+                    Library:Notify("Purchasing: " .. vehicle.name, 3)
+                    return
+                end
+            end
+            Library:Notify("Vehicle not found!", 3)
+        end
+    end,
+    Tooltip = "Buy vehicle by name"
+})
+
+VehicleGroup:AddButton({
+    Text = "Unlock Taxi Radar",
+    Func = function()
+        game:GetService("Players").LocalPlayer.variables.vip.Value = true
+        Library:Notify("Taxi Radar Unlocked!", 3)
+    end,
+    Tooltip = "Unlocks the taxi radar feature"
+})
+
+PlayerGroup:AddButton({
+    Text = "Show Players Stats",
+    Func = function()
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, "F9", false, game)
+        task.wait(0.1)
+        game:GetService("VirtualInputManager"):SendKeyEvent(false, "F9", false, game)
+        print("\n=== PLAYERS STATS ===")
+        for _, player in pairs(game.Players:GetPlayers()) do
+            print("\n--- " .. player.Name .. " ---")
+            
+            if player:FindFirstChild("variables") then
+                local vars = player.variables
+                print("Candy: " .. (vars.candy and vars.candy.Value or "N/A"))
+                print("Rep: " .. (vars.rep and vars.rep.Value or "N/A"))
+            end
+            if player:FindFirstChild("Data") then
+                local data = player.Data
+                print("Coconuts: " .. (data.coconuts and data.coconuts.Value or "N/A"))
+                local ownedCars = {}
+                if data:FindFirstChild("OwnedCars") then
+                    for _, car in pairs(data.OwnedCars:GetChildren()) do
+                        if car:IsA("BoolValue") and car.Value then
+                            table.insert(ownedCars, car.Name)
+                        end
+                    end
+                    print("Owned Cars: " .. table.concat(ownedCars, ", "))
+                end
+            end
+        end
+        print("\n=== END STATS ===\n")  
+        Library:Notify("Players stats printed to console!", 3)
+    end,
+    Tooltip = "Shows all players stats in console"
+})
+
+PlayerGroup:AddButton({
+    Text = "Reset Character",
+    Func = function()
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            character:BreakJoints()
+            Library:Notify("Character reset!", 2)
+        end
+    end,
+    Tooltip = "Resets your character"
+})
+
+VehicleGroup:AddButton({
+    Text = "Remove Ai Vehicles",
+    Func = function()
+        local tracks = game:GetService("Workspace"):FindFirstChild("Tracks")
+        if tracks then
+            tracks:Destroy()
+            Library:Notify("AI Vehicles Removed!", 3)
+        else
+            Library:Notify("No AI Vehicles found!", 3)
+        end
+    end,
+    Tooltip = "Removes all AI vehicles from the game"
+})
+
+VehicleGroup:AddButton({
+    Text = "Remove Locked Area Barriers",
+    Func = function()
+        local areaLocked = game:GetService("Workspace"):FindFirstChild("AreaLocked")
+        if areaLocked then
+            areaLocked:Destroy()
+            Library:Notify("Area Barriers Removed!", 3)
+        else
+            Library:Notify("No Area Barriers found!", 3)
+        end
+    end,
+    Tooltip = "Removes locked area barriers"
+})
+
+Library:Notify({
+    Title = "Taxi Boss Script",
+    Description = "Successfully loaded!",
+    Time = 3
+})
