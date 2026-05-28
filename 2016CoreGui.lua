@@ -1,10 +1,6 @@
-getgenv().Config2016 = ({
-    OldConsole = true,
+getgenv().LegacySettings = ({
+    Year = 2016,
     OldGraphics = true,
-    OldPlayerList = true,
-    OldBubbleChat = true,
-
-    ReplaceAgeGroupMessage = true,
-    HideVoiceChatButton = false,
+    HideDisplayName = true,
 })
-loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/projects/refs/heads/main/UI/Core2016/Source.luau"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/lxte/Legacy/refs/heads/main/Source.luau"))();
