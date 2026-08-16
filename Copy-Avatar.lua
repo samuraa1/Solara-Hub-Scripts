@@ -5,17 +5,68 @@ local LocalPlayer = Players.LocalPlayer
 local lastUsername = nil
 local dragging = false
 local dragInput, dragStart, startPos
+local open = true
+local isMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
+
+local BODY_PARTS = {
+    HumanoidRootPart = true,
+    Head = true,
+    Torso = true,
+    ["Left Arm"] = true,
+    ["Right Arm"] = true,
+    ["Left Leg"] = true,
+    ["Right Leg"] = true,
+    UpperTorso = true,
+    LowerTorso = true,
+    LeftUpperArm = true,
+    LeftLowerArm = true,
+    LeftHand = true,
+    RightUpperArm = true,
+    RightLowerArm = true,
+    RightHand = true,
+    LeftUpperLeg = true,
+    LeftLowerLeg = true,
+    LeftFoot = true,
+    RightUpperLeg = true,
+    RightLowerLeg = true,
+    RightFoot = true,
+}
+
+local COSMETIC = {
+    Accessory = true,
+    Hat = true,
+    Accoutrement = true,
+    BodyColors = true,
+    CharacterMesh = true,
+    Shirt = true,
+    Pants = true,
+    ShirtGraphic = true,
+}
+
+local SCALE_NAMES = {
+    "BodyWidthScale",
+    "BodyHeightScale",
+    "BodyDepthScale",
+    "HeadScale",
+    "BodyProportionScale",
+    "BodyTypeScale",
+}
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AvatarChangerGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local UIScale = Instance.new("UIScale")
+UIScale.Scale = isMobile and 1.15 or 1
+UIScale.Parent = ScreenGui
 
 local Frame = Instance.new("Frame")
 Frame.Name = "Main"
-Frame.Size = UDim2.new(0, 280, 0, 168)
-Frame.Position = UDim2.new(0.5, -140, 0.5, -84)
+Frame.Size = UDim2.new(0, 300, 0, 176)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -88)
 Frame.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
 Frame.BorderSizePixel = 0
 Frame.Active = true
@@ -32,7 +83,7 @@ FrameStroke.Parent = Frame
 
 local TitleBar = Instance.new("Frame")
 TitleBar.Name = "TitleBar"
-TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.Size = UDim2.new(1, 0, 0, 44)
 TitleBar.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
 TitleBar.BorderSizePixel = 0
 TitleBar.Parent = Frame
@@ -42,15 +93,15 @@ TitleCorner.CornerRadius = UDim.new(0, 12)
 TitleCorner.Parent = TitleBar
 
 local TitleFix = Instance.new("Frame")
-TitleFix.Size = UDim2.new(1, 0, 0, 12)
-TitleFix.Position = UDim2.new(0, 0, 1, -12)
+TitleFix.Size = UDim2.new(1, 0, 0, 14)
+TitleFix.Position = UDim2.new(0, 0, 1, -14)
 TitleFix.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
 TitleFix.BorderSizePixel = 0
 TitleFix.Parent = TitleBar
 
 local Title = Instance.new("TextLabel")
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, -16, 1, 0)
+Title.Size = UDim2.new(1, -52, 1, 0)
 Title.Position = UDim2.new(0, 16, 0, 0)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 16
@@ -59,20 +110,26 @@ Title.TextColor3 = Color3.fromRGB(240, 240, 245)
 Title.Text = "Avatar Changer"
 Title.Parent = TitleBar
 
-local Hint = Instance.new("TextLabel")
-Hint.BackgroundTransparency = 1
-Hint.Size = UDim2.new(0, 90, 1, 0)
-Hint.Position = UDim2.new(1, -100, 0, 0)
-Hint.Font = Enum.Font.Gotham
-Hint.TextSize = 11
-Hint.TextXAlignment = Enum.TextXAlignment.Right
-Hint.TextColor3 = Color3.fromRGB(140, 140, 155)
-Hint.Text = "RShift"
-Hint.Parent = TitleBar
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Name = "Close"
+CloseBtn.Size = UDim2.new(0, 32, 0, 32)
+CloseBtn.Position = UDim2.new(1, -38, 0.5, -16)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 62)
+CloseBtn.BorderSizePixel = 0
+CloseBtn.AutoButtonColor = false
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.TextColor3 = Color3.fromRGB(230, 230, 235)
+CloseBtn.Text = "×"
+CloseBtn.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBtn
 
 local TextBox = Instance.new("TextBox")
-TextBox.Size = UDim2.new(1, -28, 0, 36)
-TextBox.Position = UDim2.new(0, 14, 0, 52)
+TextBox.Size = UDim2.new(1, -28, 0, 40)
+TextBox.Position = UDim2.new(0, 14, 0, 56)
 TextBox.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
 TextBox.BorderSizePixel = 0
 TextBox.ClearTextOnFocus = false
@@ -95,8 +152,8 @@ TextCorner.CornerRadius = UDim.new(0, 8)
 TextCorner.Parent = TextBox
 
 local Button = Instance.new("TextButton")
-Button.Size = UDim2.new(1, -28, 0, 36)
-Button.Position = UDim2.new(0, 14, 0, 96)
+Button.Size = UDim2.new(1, -28, 0, 40)
+Button.Position = UDim2.new(0, 14, 0, 104)
 Button.BackgroundColor3 = Color3.fromRGB(70, 130, 255)
 Button.BorderSizePixel = 0
 Button.AutoButtonColor = false
@@ -113,7 +170,7 @@ ButtonCorner.Parent = Button
 local Status = Instance.new("TextLabel")
 Status.BackgroundTransparency = 1
 Status.Size = UDim2.new(1, -28, 0, 20)
-Status.Position = UDim2.new(0, 14, 0, 138)
+Status.Position = UDim2.new(0, 14, 0, 148)
 Status.Font = Enum.Font.Gotham
 Status.TextSize = 12
 Status.TextXAlignment = Enum.TextXAlignment.Left
@@ -121,15 +178,34 @@ Status.TextColor3 = Color3.fromRGB(150, 150, 165)
 Status.Text = "Enter a player name"
 Status.Parent = Frame
 
-local COSMETIC = {
-    Accessory = true,
-    Hat = true,
-    BodyColors = true,
-    CharacterMesh = true,
-    Shirt = true,
-    Pants = true,
-    ShirtGraphic = true,
-}
+local OpenBtn = Instance.new("TextButton")
+OpenBtn.Name = "Reopen"
+OpenBtn.Size = UDim2.new(0, 128, 0, 36)
+OpenBtn.Position = UDim2.new(0, 16, 0, 80)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+OpenBtn.BorderSizePixel = 0
+OpenBtn.AutoButtonColor = false
+OpenBtn.Visible = false
+OpenBtn.Font = Enum.Font.GothamBold
+OpenBtn.TextSize = 13
+OpenBtn.TextColor3 = Color3.fromRGB(240, 240, 245)
+OpenBtn.Text = "Avatar Changer"
+OpenBtn.Parent = ScreenGui
+
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(0, 10)
+OpenCorner.Parent = OpenBtn
+
+local OpenStroke = Instance.new("UIStroke")
+OpenStroke.Color = Color3.fromRGB(70, 130, 255)
+OpenStroke.Thickness = 1
+OpenStroke.Parent = OpenBtn
+
+local function setOpen(state)
+    open = state
+    Frame.Visible = state
+    OpenBtn.Visible = not state
+end
 
 local function setStatus(text, color)
     Status.Text = text
@@ -168,10 +244,95 @@ local function findPlayer(query)
     return matches[1]
 end
 
+local function clearWelds(inst)
+    for _, w in ipairs(inst:GetDescendants()) do
+        if w:IsA("Weld") or w:IsA("WeldConstraint") or w:IsA("Motor6D") or w:IsA("RigidConstraint") then
+            w:Destroy()
+        end
+    end
+end
+
+local function findAttachment(char, name, ignore)
+    for _, d in ipairs(char:GetDescendants()) do
+        if d:IsA("Attachment") and d.Name == name and not d:IsDescendantOf(ignore) then
+            return d
+        end
+    end
+end
+
+local function weldAccessory(char, accessory)
+    local handle = accessory:FindFirstChild("Handle")
+    accessory.Parent = char
+    if not handle or not handle:IsA("BasePart") then
+        return
+    end
+
+    clearWelds(accessory)
+    handle.CanCollide = false
+    handle.Massless = true
+    handle.Anchored = false
+
+    local handleAtt = handle:FindFirstChildOfClass("Attachment")
+    local targetAtt = handleAtt and findAttachment(char, handleAtt.Name, accessory)
+    local targetPart = (targetAtt and targetAtt.Parent) or char:FindFirstChild("Head")
+    if not targetPart or not targetPart:IsA("BasePart") then
+        return
+    end
+
+    if targetAtt and handleAtt then
+        local weld = Instance.new("Weld")
+        weld.Name = "AccessoryWeld"
+        weld.Part0 = targetPart
+        weld.Part1 = handle
+        weld.C0 = targetAtt.CFrame
+        weld.C1 = handleAtt.CFrame
+        weld.Parent = handle
+    else
+        local weld = Instance.new("Weld")
+        weld.Name = "AccessoryWeld"
+        weld.Part0 = targetPart
+        weld.Part1 = handle
+        weld.Parent = handle
+    end
+end
+
+local function retargetWelds(clone, fromChar, toChar)
+    for _, w in ipairs(clone:GetDescendants()) do
+        if w:IsA("Weld") or w:IsA("Motor6D") or w:IsA("WeldConstraint") then
+            local function remap(part)
+                if not part then
+                    return nil
+                end
+                if part == fromChar or fromChar:IsAncestorOf(part) then
+                    if BODY_PARTS[part.Name] then
+                        return toChar:FindFirstChild(part.Name)
+                    end
+                end
+                return part
+            end
+            if w:IsA("WeldConstraint") then
+                w.Part0 = remap(w.Part0)
+                w.Part1 = remap(w.Part1)
+            else
+                w.Part0 = remap(w.Part0)
+                w.Part1 = remap(w.Part1)
+            end
+        end
+    end
+end
+
 local function clearCosmetics(char)
     for _, c in ipairs(char:GetChildren()) do
-        if COSMETIC[c.ClassName] then
+        if COSMETIC[c.ClassName] or c:IsA("Accoutrement") then
             c:Destroy()
+        elseif c:IsA("BasePart") and not BODY_PARTS[c.Name] then
+            c:Destroy()
+        elseif c:IsA("Folder") then
+            for _, nested in ipairs(c:GetChildren()) do
+                if nested:IsA("Accoutrement") then
+                    nested:Destroy()
+                end
+            end
         end
     end
 end
@@ -192,6 +353,39 @@ local function copyFace(fromHead, toHead)
     end
 end
 
+local function copyHeadMesh(fromHead, toHead)
+    if not fromHead or not toHead then
+        return
+    end
+    local srcMesh = fromHead:FindFirstChildOfClass("SpecialMesh")
+    if srcMesh then
+        local dstMesh = toHead:FindFirstChildOfClass("SpecialMesh")
+        if dstMesh then
+            dstMesh.MeshId = srcMesh.MeshId
+            dstMesh.TextureId = srcMesh.TextureId
+            dstMesh.Scale = srcMesh.Scale
+            dstMesh.Offset = srcMesh.Offset
+            dstMesh.MeshType = srcMesh.MeshType
+        else
+            srcMesh:Clone().Parent = toHead
+        end
+    end
+end
+
+local function copyWrapTargets(fromChar, toChar)
+    for _, srcPart in ipairs(fromChar:GetChildren()) do
+        if srcPart:IsA("BasePart") then
+            local dstPart = toChar:FindFirstChild(srcPart.Name)
+            if dstPart and dstPart:IsA("BasePart") then
+                local wrap = srcPart:FindFirstChildOfClass("WrapTarget")
+                if wrap and not dstPart:FindFirstChildOfClass("WrapTarget") then
+                    wrap:Clone().Parent = dstPart
+                end
+            end
+        end
+    end
+end
+
 local function copyBodyLooks(fromChar, toChar)
     for _, part in ipairs(toChar:GetChildren()) do
         if part:IsA("BasePart") then
@@ -201,6 +395,9 @@ local function copyBodyLooks(fromChar, toChar)
                 part.Material = src.Material
                 if src:IsA("MeshPart") and part:IsA("MeshPart") then
                     pcall(function()
+                        part.MeshId = src.MeshId
+                    end)
+                    pcall(function()
                         part.TextureID = src.TextureID
                     end)
                 end
@@ -209,33 +406,68 @@ local function copyBodyLooks(fromChar, toChar)
     end
 end
 
-local function cloneCosmetics(fromChar, toChar, hum)
-    for _, c in ipairs(fromChar:GetChildren()) do
-        if c:IsA("Accessory") or c:IsA("Hat") then
-            local clone = c:Clone()
-            local ok = pcall(function()
-                hum:AddAccessory(clone)
-            end)
-            if not ok or clone.Parent == nil then
-                clone.Parent = toChar
-            end
-        elseif c:IsA("Shirt") or c:IsA("Pants") or c:IsA("ShirtGraphic") or c:IsA("BodyColors") or c:IsA("CharacterMesh") then
-            c:Clone().Parent = toChar
+local function copyScales(fromHum, toHum)
+    for _, name in ipairs(SCALE_NAMES) do
+        local src = fromHum:FindFirstChild(name)
+        local dst = toHum:FindFirstChild(name)
+        if src and dst and src:IsA("NumberValue") and dst:IsA("NumberValue") then
+            dst.Value = src.Value
         end
     end
-    copyFace(fromChar:FindFirstChild("Head"), toChar:FindFirstChild("Head"))
+end
+
+local function eachAccessory(char, fn)
+    for _, c in ipairs(char:GetChildren()) do
+        if c:IsA("Accoutrement") then
+            fn(c)
+        elseif c:IsA("Folder") then
+            for _, nested in ipairs(c:GetChildren()) do
+                if nested:IsA("Accoutrement") then
+                    fn(nested)
+                end
+            end
+        end
+    end
+end
+
+local function cloneCosmetics(fromChar, toChar, hum)
+    copyWrapTargets(fromChar, toChar)
+    copyScales(fromChar:FindFirstChildOfClass("Humanoid"), hum)
+
+    eachAccessory(fromChar, function(acc)
+        local clone = acc:Clone()
+        weldAccessory(toChar, clone)
+    end)
+
+    for _, c in ipairs(fromChar:GetChildren()) do
+        if c:IsA("Shirt") or c:IsA("Pants") or c:IsA("ShirtGraphic") or c:IsA("BodyColors") or c:IsA("CharacterMesh") then
+            local old = toChar:FindFirstChild(c.Name)
+            if old and (old.ClassName == c.ClassName) then
+                old:Destroy()
+            end
+            c:Clone().Parent = toChar
+        elseif c:IsA("BasePart") and not BODY_PARTS[c.Name] then
+            local clone = c:Clone()
+            clone.Parent = toChar
+            retargetWelds(clone, fromChar, toChar)
+        end
+    end
+
+    local fromHead = fromChar:FindFirstChild("Head")
+    local toHead = toChar:FindFirstChild("Head")
+    copyFace(fromHead, toHead)
+    copyHeadMesh(fromHead, toHead)
     copyBodyLooks(fromChar, toChar)
 end
 
 local function applyDescription(hum, desc)
-    local ok = pcall(function()
+    return pcall(function()
         if hum.ApplyDescriptionClientServer then
             hum:ApplyDescriptionClientServer(desc)
         else
             hum:ApplyDescription(desc)
         end
     end)
-    return ok
 end
 
 local function getDescription(targetPlayer, username)
@@ -287,7 +519,7 @@ local function apply_avatar(username)
         local desc = getDescription(targetPlayer, username)
         if desc then
             applyDescription(hum, desc)
-            task.wait(0.15)
+            task.wait(0.2)
         end
 
         local targetChar = targetPlayer and targetPlayer.Character
@@ -343,22 +575,42 @@ TextBox.FocusLost:Connect(function(enterPressed)
     end
 end)
 
+CloseBtn.MouseEnter:Connect(function()
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(190, 70, 70)
+end)
+CloseBtn.MouseLeave:Connect(function()
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 62)
+end)
+CloseBtn.MouseButton1Click:Connect(function()
+    setOpen(false)
+end)
+OpenBtn.MouseButton1Click:Connect(function()
+    setOpen(true)
+end)
+
 local function update(input)
     local delta = input.Position - dragStart
     Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
-TitleBar.InputBegan:Connect(function(input)
+local function beginDrag(input, target)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
-        startPos = Frame.Position
+        startPos = target.Position
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
             end
         end)
     end
+end
+
+TitleBar.InputBegan:Connect(function(input)
+    beginDrag(input, Frame)
+end)
+OpenBtn.InputBegan:Connect(function(input)
+    beginDrag(input, OpenBtn)
 end)
 
 TitleBar.InputChanged:Connect(function(input)
@@ -366,20 +618,25 @@ TitleBar.InputChanged:Connect(function(input)
         dragInput = input
     end
 end)
-
-UIS.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        update(input)
+OpenBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
     end
 end)
 
-local open = true
-UIS.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then
-        return
+UIS.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        if Frame.Visible then
+            update(input)
+        else
+            local delta = input.Position - dragStart
+            OpenBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
     end
+end)
+
+UIS.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.RightShift then
-        open = not open
-        Frame.Visible = open
+        setOpen(not open)
     end
 end)
